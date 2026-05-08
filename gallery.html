@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gallery | Portfolio</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <div class="top-bar">
+        <nav class="top-nav">
+          <a class="nav-link" href="index.html">Home</a>
+          <a class="nav-link" href="about.html">About</a>
+          <a class="nav-link" href="gallery.html">Gallery & Video</a>
+        </nav>
+        <div class="top-actions">
+          <button class="lang-toggle" id="langToggle" type="button">EN</button>
+          <div class="social-links">
+            <a class="social-link" href="https://www.instagram.com/lorraine_liu311/" target="_blank" rel="noreferrer" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2zm0 1.9A3.9 3.9 0 0 0 3.9 7.8v8.4a3.9 3.9 0 0 0 3.9 3.9h8.4a3.9 3.9 0 0 0 3.9-3.9V7.8a3.9 3.9 0 0 0-3.9-3.9H7.8zm9.07 1.45a1.21 1.21 0 1 1 0 2.42 1.21 1.21 0 0 1 0-2.42zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 1.9A3.1 3.1 0 1 0 12 15.1 3.1 3.1 0 0 0 12 8.9z"/></svg>
+              <span class="sr-only">Instagram @lorraine_liu311</span>
+            </a>
+            <a class="social-link" href="https://www.youtube.com/@lorraine-liu" target="_blank" rel="noreferrer" aria-label="YouTube">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22.54 7.23a3.1 3.1 0 0 0-2.18-2.2C18.42 4.5 12 4.5 12 4.5s-6.42 0-8.36.53a3.1 3.1 0 0 0-2.18 2.2A32.7 32.7 0 0 0 1 12a32.7 32.7 0 0 0 .46 4.77 3.1 3.1 0 0 0 2.18 2.2c1.94.53 8.36.53 8.36.53s6.42 0 8.36-.53a3.1 3.1 0 0 0 2.18-2.2A32.7 32.7 0 0 0 23 12a32.7 32.7 0 0 0-.46-4.77zM10 15.5v-7l6 3.5-6 3.5z"/></svg>
+              <span class="sr-only">YouTube @lorraine-liu</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <section class="section" id="imageSection">
+        <div class="section-header">
+          <h2 class="section-title" id="imageTitle">靜態作品</h2>
+          <p class="section-desc" id="imageDesc">Image Works</p>
+        </div>
+        <p class="body-copy" id="imageDescription">
+          這些照片依主題分類，包含藝術、街拍、家庭與日常紀錄。每一張都來自我的生活觀察，也是我持續練習構圖與色調的過程。
+        </p>
+        <div class="category-tabs" id="categoryTabs">
+          <button class="tab-btn" data-category="Art" type="button">Art</button>
+          <button class="tab-btn is-active" data-category="Cat" type="button">Cat</button>
+          <button class="tab-btn" data-category="Family" type="button">Family</button>
+          <button class="tab-btn" data-category="Me" type="button">Me</button>
+          <button class="tab-btn" data-category="School" type="button">School</button>
+          <button class="tab-btn" data-category="Street snap 2024" type="button">Street 2024</button>
+          <button class="tab-btn" data-category="Street snap 2025" type="button">Street 2025</button>
+        </div>
+        <p class="category-blurb" id="categoryBlurb">街頭中的可愛瞬間與生活節奏。</p>
+        <div class="carousel">
+          <button class="carousel-nav prev" id="prevSlide" aria-label="上一張" type="button">&#10094;</button>
+          <div class="carousel-viewport">
+            <div class="carousel-track" id="carouselTrack"></div>
+          </div>
+          <button class="carousel-nav next" id="nextSlide" aria-label="下一張" type="button">&#10095;</button>
+        </div>
+        <div class="carousel-dots" id="carouselDots" aria-label="輪播指示器"></div>
+        <div class="carousel-meta">
+          <span id="carouselCategory">Cat</span>
+          <span id="carouselCounter">1 / 1</span>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title" id="videoTitle">動態作品</h2>
+          <p class="section-desc" id="videoDesc">Video Works</p>
+        </div>
+        <p class="body-copy" id="videoDescription">動態作品是我在剪輯與敘事上的練習，主要嘗試節奏安排、轉場和情緒鋪陳。</p>
+        <div class="videos">
+          <div class="video">
+            <iframe
+              src="https://www.youtube.com/embed/1L9mmsNUsvU"
+              title="作品連結一"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
+          </div>
+          <div class="video">
+            <iframe
+              src="https://www.youtube.com/embed/J5TfM_7JMHc"
+              title="作品連結二"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="script.js"></script>
+  </body>
+</html>
