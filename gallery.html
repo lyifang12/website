@@ -51,6 +51,30 @@
         <div class="carousel">
           <button class="carousel-nav prev" id="prevSlide" aria-label="上一張" type="button">&#10094;</button>
           <div class="carousel-viewport-shell">
+            <div
+              class="carousel-load-overlay"
+              id="carouselLoadOverlay"
+              aria-hidden="true"
+              aria-busy="false"
+              aria-live="polite"
+            >
+              <div class="carousel-load-panel">
+                <div class="carousel-load-spinner" aria-hidden="true"></div>
+                <p class="carousel-load-label" id="carouselLoadLabel"></p>
+                <div
+                  class="carousel-load-track"
+                  id="carouselLoadTrack"
+                  role="progressbar"
+                  aria-valuemin="0"
+                  aria-valuemax="1"
+                  aria-valuenow="0"
+                  aria-labelledby="carouselLoadLabel"
+                >
+                  <div class="carousel-load-fill" id="carouselLoadFill"></div>
+                </div>
+                <p class="carousel-load-count" id="carouselLoadCount"></p>
+              </div>
+            </div>
             <div class="carousel-viewport">
               <div class="carousel-track" id="carouselTrack"></div>
             </div>
@@ -71,33 +95,23 @@
         </div>
         <p class="body-copy" id="videoDescription">動態作品是我在剪輯與敘事上的練習，主要嘗試節奏安排、轉場和情緒鋪陳。</p>
         <div class="videos">
-          <div class="video media-donut-shell" data-media-donut>
-            <div class="media-donut-fg">
-              <iframe
-                id="videoEmbed1"
-                src="https://www.youtube.com/embed/1L9mmsNUsvU"
-                title="影片作品（一）"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowfullscreen
-              ></iframe>
-            </div>
-            <div class="media-donut-placeholder" aria-hidden="true">
-              <div class="media-donut-spinner" aria-hidden="true"></div>
-            </div>
+          <div class="video">
+            <iframe
+              id="videoEmbed1"
+              src="https://www.youtube.com/embed/1L9mmsNUsvU"
+              title="影片作品（一）"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
           </div>
-          <div class="video media-donut-shell" data-media-donut>
-            <div class="media-donut-fg">
-              <iframe
-                id="videoEmbed2"
-                src="https://www.youtube.com/embed/J5TfM_7JMHc"
-                title="影片作品（二）"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowfullscreen
-              ></iframe>
-            </div>
-            <div class="media-donut-placeholder" aria-hidden="true">
-              <div class="media-donut-spinner" aria-hidden="true"></div>
-            </div>
+          <div class="video">
+            <iframe
+              id="videoEmbed2"
+              src="https://www.youtube.com/embed/J5TfM_7JMHc"
+              title="影片作品（二）"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
           </div>
         </div>
       </section>

@@ -66,6 +66,8 @@ const i18n = {
     navAbout: "關於我",
     navGallery: "作品集與影片",
     carouselDotsLabel: "輪播指示器",
+    carouselLoadLabel: "載入照片中…",
+    carouselLoadCount: "{loaded} / {total}",
     videoIframeTitle1: "影片作品（一）",
     videoIframeTitle2: "影片作品（二）",
     exploreBtn: "查看作品",
@@ -140,6 +142,8 @@ const i18n = {
     navAbout: "About",
     navGallery: "Gallery & Video",
     carouselDotsLabel: "Carousel indicators",
+    carouselLoadLabel: "Loading photos…",
+    carouselLoadCount: "{loaded} / {total}",
     videoIframeTitle1: "Video 1",
     videoIframeTitle2: "Video 2",
     exploreBtn: "Explore Works",
@@ -259,121 +263,48 @@ const categoryImages = {
   ],
 };
 
-const ABOUT_PROFILE_SRC = "image/about-profile.png";
-
-const MEDIA_DONUT_PLACEHOLDER_HTML = `<div class="media-donut-placeholder" aria-hidden="true"><div class="media-donut-spinner" aria-hidden="true"></div></div>`;
-
-const initMediaDonutShells = (root) => {
-  if (!root) return;
-  root.querySelectorAll(".media-donut-shell[data-media-donut]").forEach((shell) => {
-    if (shell.dataset.donutBound === "1") return;
-    shell.dataset.donutBound = "1";
-    const media = shell.querySelector(".media-donut-fg img, .media-donut-fg iframe");
-    if (!media) return;
-    shell.setAttribute("aria-busy", "true");
-
-    const reveal = () => {
-      shell.classList.add("is-ready");
-      shell.setAttribute("aria-busy", "false");
-    };
-
-    if (media instanceof HTMLImageElement) {
-      if (media.complete && media.naturalWidth > 0) {
-        reveal();
-        return;
-      }
-      media.addEventListener("load", reveal, { once: true });
-      media.addEventListener("error", reveal, { once: true });
-      return;
-    }
-
-    if (media instanceof HTMLIFrameElement) {
-      let settled = false;
-      const run = () => {
-        if (settled) return;
-        settled = true;
-        window.clearTimeout(fallbackTimer);
-        reveal();
-      };
-      const fallbackTimer = window.setTimeout(run, 14000);
-      media.addEventListener("load", run, { once: true });
-    }
-  });
-};
-
-/**
- * Prefetch order (homepage): Index cover → About photo → Cat album → other categories (object key order).
- * Returns ordered URLs plus segment lengths for fetchPriority hints.
- */
-const getGalleryPrefetchUrlPlan = () => {
+/** Unique gallery image URLs for HTTP cache warm-up (runs in idle time). */
+const allGalleryImageUrls = (() => {
   const seen = new Set();
-  const urls = [];
-  const push = (u) => {
-    if (!u || seen.has(u)) return;
-    seen.add(u);
-    urls.push(u);
-  };
-
-  const coverSrc =
-    typeof document !== "undefined" ? document.querySelector(".cover-image")?.getAttribute("src")?.trim() : null;
-  if (coverSrc) push(coverSrc);
-  push(ABOUT_PROFILE_SRC);
-
-  const shellCount = urls.length;
-
-  const catList = categoryImages.Cat || [];
-  catList.forEach((u) => push(u));
-  const catCount = catList.length;
-
-  Object.keys(categoryImages).forEach((key) => {
-    if (key === "Cat") return;
-    (categoryImages[key] || []).forEach((u) => push(u));
+  const out = [];
+  Object.values(categoryImages).forEach((list) => {
+    list.forEach((src) => {
+      if (seen.has(src)) return;
+      seen.add(src);
+      out.push(src);
+    });
   });
+  return out;
+})();
 
-  return { urls, shellCount, catCount };
-};
-
-const SITE_BOOT_STORAGE_KEY = "liu_site_media_boot_v1";
-
-/**
- * First visit this session: parallel-download gallery images in the background (no UI).
- */
-const runSiteBootPrefetch = () => {
-  const conn = typeof navigator !== "undefined" ? navigator.connection : undefined;
-  if (conn?.saveData) {
-    return;
-  }
-
-  if (sessionStorage.getItem(SITE_BOOT_STORAGE_KEY)) {
-    return;
-  }
-
-  const { urls } = getGalleryPrefetchUrlPlan();
-  if (urls.length === 0) {
-    sessionStorage.setItem(SITE_BOOT_STORAGE_KEY, "1");
-    return;
-  }
-
-  let done = 0;
-  const total = urls.length;
-
-  const bump = () => {
-    done += 1;
-    if (done >= total) {
-      sessionStorage.setItem(SITE_BOOT_STORAGE_KEY, "1");
+const prefetchAllGalleryImages = () => {
+  const urls = allGalleryImageUrls;
+  if (urls.length === 0) return;
+  let i = 0;
+  const perIdle = 12;
+  const pump = () => {
+    const end = Math.min(i + perIdle, urls.length);
+    for (; i < end; i += 1) {
+      const img = new Image();
+      img.decoding = "async";
+      if ("fetchPriority" in img) {
+        img.fetchPriority = "low";
+      }
+      img.src = urls[i];
+    }
+    if (i < urls.length) {
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(pump, { timeout: 2500 });
+      } else {
+        window.setTimeout(pump, 0);
+      }
     }
   };
-
-  urls.forEach((src, idx) => {
-    const img = new Image();
-    img.decoding = "async";
-    if ("fetchPriority" in img) {
-      img.fetchPriority = idx < 6 ? "high" : "auto";
-    }
-    img.addEventListener("load", bump, { once: true });
-    img.addEventListener("error", bump, { once: true });
-    img.src = src;
-  });
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(pump, { timeout: 2000 });
+  } else {
+    window.setTimeout(pump, 300);
+  }
 };
 
 const categoryTabs = document.querySelectorAll(".tab-btn");
@@ -389,17 +320,110 @@ const langToggle = document.getElementById("langToggle");
 const coverSection = document.getElementById("coverSection");
 const exploreBtn = document.getElementById("exploreBtn");
 const imageSection = document.getElementById("imageSection");
+const carouselLoadOverlay = document.getElementById("carouselLoadOverlay");
+const carouselLoadFill = document.getElementById("carouselLoadFill");
+const carouselLoadLabel = document.getElementById("carouselLoadLabel");
+const carouselLoadCount = document.getElementById("carouselLoadCount");
+const carouselLoadTrack = document.getElementById("carouselLoadTrack");
 
 let currentCategory = "Cat";
 let currentIndex = 0;
 let autoplayTimer = null;
 let currentLang = localStorage.getItem("portfolio_lang") || "zh";
+let carouselLoadSafetyTimer = null;
+let carouselProgressState = { loaded: 0, total: 0 };
 
 const translateText = (id, value) => {
   const el = document.getElementById(id);
   if (el) {
     el.textContent = value;
   }
+};
+
+const hideCarouselLoading = () => {
+  if (carouselLoadSafetyTimer !== null) {
+    window.clearTimeout(carouselLoadSafetyTimer);
+    carouselLoadSafetyTimer = null;
+  }
+  if (!carouselLoadOverlay) return;
+  carouselLoadOverlay.classList.remove("is-active");
+  carouselLoadOverlay.setAttribute("aria-hidden", "true");
+  carouselLoadOverlay.setAttribute("aria-busy", "false");
+};
+
+const updateCarouselLoadingProgress = (loaded, total) => {
+  carouselProgressState = { loaded, total };
+  const t = i18n[currentLang];
+  if (carouselLoadLabel) carouselLoadLabel.textContent = t.carouselLoadLabel;
+  if (carouselLoadCount) {
+    carouselLoadCount.textContent = t.carouselLoadCount
+      .replace("{loaded}", String(loaded))
+      .replace("{total}", String(total));
+  }
+  const pct = total > 0 ? Math.round((loaded / total) * 100) : 100;
+  if (carouselLoadFill) carouselLoadFill.style.width = `${pct}%`;
+  if (carouselLoadTrack) {
+    carouselLoadTrack.setAttribute("aria-valuemax", String(Math.max(total, 1)));
+    carouselLoadTrack.setAttribute("aria-valuenow", String(loaded));
+  }
+};
+
+const bindCarouselImageLoads = () => {
+  if (!carouselTrack) return;
+  hideCarouselLoading();
+
+  const imgs = Array.from(carouselTrack.querySelectorAll("img"));
+  const total = imgs.length;
+  if (total === 0) return;
+
+  const firstImg = imgs[0];
+  const isReady = (img) => img.complete && img.naturalWidth > 0;
+
+  const revealIfFirstReady = () => {
+    if (!isReady(firstImg)) return;
+    if (carouselLoadSafetyTimer !== null) {
+      window.clearTimeout(carouselLoadSafetyTimer);
+      carouselLoadSafetyTimer = null;
+    }
+    window.setTimeout(() => {
+      hideCarouselLoading();
+    }, 120);
+  };
+
+  const firstAlreadyReady = isReady(firstImg);
+  if (!firstAlreadyReady) {
+    carouselLoadOverlay?.classList.add("is-active");
+    carouselLoadOverlay?.setAttribute("aria-hidden", "false");
+    carouselLoadOverlay?.setAttribute("aria-busy", "true");
+    carouselLoadSafetyTimer = window.setTimeout(() => {
+      hideCarouselLoading();
+    }, 45000);
+  }
+
+  let loaded = imgs.filter(isReady).length;
+  updateCarouselLoadingProgress(loaded, total);
+  revealIfFirstReady();
+
+  const onOneLoaded = () => {
+    loaded += 1;
+    updateCarouselLoadingProgress(loaded, total);
+    revealIfFirstReady();
+    if (loaded >= total) {
+      if (carouselLoadSafetyTimer !== null) {
+        window.clearTimeout(carouselLoadSafetyTimer);
+        carouselLoadSafetyTimer = null;
+      }
+      window.setTimeout(() => {
+        hideCarouselLoading();
+      }, 220);
+    }
+  };
+
+  imgs.forEach((img) => {
+    if (isReady(img)) return;
+    img.addEventListener("load", onOneLoaded, { once: true });
+    img.addEventListener("error", onOneLoaded, { once: true });
+  });
 };
 
 const applyLanguage = () => {
@@ -472,6 +496,10 @@ const applyLanguage = () => {
     tab.textContent = t.categories[key] || key;
   });
 
+  if (carouselLoadOverlay?.classList.contains("is-active")) {
+    updateCarouselLoadingProgress(carouselProgressState.loaded, carouselProgressState.total);
+  }
+
   if (carouselTrack && dotsContainer) {
     renderSlides();
   } else {
@@ -489,13 +517,7 @@ const renderSlides = () => {
         currentLang === "zh"
           ? `${categoryLabel}，第 ${idx + 1} 張`
           : `${categoryLabel} ${idx + 1}`;
-      const loadingMode = idx === 0 ? "eager" : "lazy";
-      return `<article class="slide media-donut-shell" data-media-donut>
-      <div class="media-donut-fg">
-        <img src="${src}" alt="${alt}" loading="${loadingMode}" decoding="async" />
-      </div>
-      ${MEDIA_DONUT_PLACEHOLDER_HTML}
-    </article>`;
+      return `<article class="slide"><img src="${src}" alt="${alt}" loading="eager" decoding="async" /></article>`;
     })
     .join("");
 
@@ -509,7 +531,7 @@ const renderSlides = () => {
 
   currentIndex = 0;
   updateCarousel();
-  initMediaDonutShells(carouselTrack);
+  bindCarouselImageLoads();
 };
 
 const updateCarousel = () => {
@@ -665,5 +687,4 @@ renderSlides();
 applyLanguage();
 applyActiveNav();
 restartAutoplay();
-runSiteBootPrefetch();
-initMediaDonutShells(document.body);
+prefetchAllGalleryImages();
