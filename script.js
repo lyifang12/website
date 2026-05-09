@@ -263,6 +263,87 @@ const categoryImages = {
   ],
 };
 
+const ABOUT_PROFILE_SRC = "image/about-profile.png";
+
+/**
+ * Prefetch order (homepage): Index cover → About photo → Cat album → other categories (object key order).
+ * Returns ordered URLs plus segment lengths for fetchPriority hints.
+ */
+const getGalleryPrefetchUrlPlan = () => {
+  const seen = new Set();
+  const urls = [];
+  const push = (u) => {
+    if (!u || seen.has(u)) return;
+    seen.add(u);
+    urls.push(u);
+  };
+
+  const coverSrc =
+    typeof document !== "undefined" ? document.querySelector(".cover-image")?.getAttribute("src")?.trim() : null;
+  if (coverSrc) push(coverSrc);
+  push(ABOUT_PROFILE_SRC);
+
+  const shellCount = urls.length;
+
+  const catList = categoryImages.Cat || [];
+  catList.forEach((u) => push(u));
+  const catCount = catList.length;
+
+  Object.keys(categoryImages).forEach((key) => {
+    if (key === "Cat") return;
+    (categoryImages[key] || []).forEach((u) => push(u));
+  });
+
+  return { urls, shellCount, catCount };
+};
+
+const isHomePage = () => {
+  const leaf = (window.location.pathname.split("/").pop() || "").toLowerCase();
+  return leaf === "" || leaf === "index.html";
+};
+
+/** Prefetch site + gallery photos from the homepage in priority order (warms cache before visiting About / Gallery). */
+const prefetchGalleryImagesInBackground = () => {
+  if (!isHomePage()) return;
+  const { urls, shellCount, catCount } = getGalleryPrefetchUrlPlan();
+  if (urls.length === 0) return;
+  const conn = typeof navigator !== "undefined" ? navigator.connection : undefined;
+  if (conn?.saveData) return;
+
+  const idle =
+    typeof window.requestIdleCallback === "function"
+      ? (cb) => window.requestIdleCallback(cb, { timeout: 8000 })
+      : (cb) => window.setTimeout(cb, 1600);
+
+  let cursor = 0;
+  const batchSize = 4;
+  const catEnd = shellCount + catCount;
+
+  const pump = () => {
+    const end = Math.min(cursor + batchSize, urls.length);
+    for (; cursor < end; cursor += 1) {
+      const src = urls[cursor];
+      const img = new Image();
+      img.decoding = "async";
+      if ("fetchPriority" in img) {
+        if (cursor < shellCount) {
+          img.fetchPriority = "high";
+        } else if (cursor < catEnd) {
+          img.fetchPriority = "auto";
+        } else {
+          img.fetchPriority = "low";
+        }
+      }
+      img.src = src;
+    }
+    if (cursor < urls.length) {
+      idle(pump);
+    }
+  };
+
+  idle(pump);
+};
+
 const categoryTabs = document.querySelectorAll(".tab-btn");
 const carouselTrack = document.getElementById("carouselTrack");
 const carouselViewport = document.querySelector(".carousel-viewport");
@@ -342,25 +423,36 @@ const bindCarouselImageLoads = () => {
   }, 45000);
 
   let loaded = 0;
-  const bump = () => {
-    loaded += 1;
-    updateCarouselLoadingProgress(loaded, total);
-    if (loaded >= total) {
-      if (carouselLoadSafetyTimer !== null) {
-        window.clearTimeout(carouselLoadSafetyTimer);
-        carouselLoadSafetyTimer = null;
-      }
-      carouselLoadSafetyTimer = window.setTimeout(() => {
-        hideCarouselLoading();
-      }, 220);
+  let overlayDismissed = false;
+
+  const dismissOverlay = () => {
+    if (overlayDismissed) return;
+    overlayDismissed = true;
+    if (carouselLoadSafetyTimer !== null) {
+      window.clearTimeout(carouselLoadSafetyTimer);
+      carouselLoadSafetyTimer = null;
     }
+    carouselLoadSafetyTimer = window.setTimeout(() => {
+      hideCarouselLoading();
+      carouselLoadSafetyTimer = null;
+    }, 120);
   };
 
-  imgs.forEach((img) => {
-    if (img.complete && img.naturalWidth > 0) bump();
-    else {
-      img.addEventListener("load", bump, { once: true });
-      img.addEventListener("error", bump, { once: true });
+  imgs.forEach((img, idx) => {
+    const onImgDone = () => {
+      loaded += 1;
+      if (!overlayDismissed) {
+        updateCarouselLoadingProgress(loaded, total);
+      }
+      if (idx === 0) dismissOverlay();
+      if (loaded >= total) dismissOverlay();
+    };
+
+    if (img.complete && img.naturalWidth > 0) {
+      onImgDone();
+    } else {
+      img.addEventListener("load", onImgDone, { once: true });
+      img.addEventListener("error", onImgDone, { once: true });
     }
   });
 };
@@ -456,7 +548,8 @@ const renderSlides = () => {
         currentLang === "zh"
           ? `${categoryLabel}，第 ${idx + 1} 張`
           : `${categoryLabel} ${idx + 1}`;
-      return `<article class="slide"><img src="${src}" alt="${alt}" loading="eager" decoding="async" /></article>`;
+      const loadingMode = idx === 0 ? "eager" : "lazy";
+      return `<article class="slide"><img src="${src}" alt="${alt}" loading="${loadingMode}" decoding="async" /></article>`;
     })
     .join("");
 
@@ -622,6 +715,7 @@ const applyActiveNav = () => {
   });
 };
 
+prefetchGalleryImagesInBackground();
 renderSlides();
 applyLanguage();
 applyActiveNav();
