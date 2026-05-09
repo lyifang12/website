@@ -19,20 +19,21 @@ revealTargets.forEach((el) => {
 
 const i18n = {
   zh: {
-    pageTitle: "作品集 | UX 實習生與攝影",
+    pageTitle: "劉宜芳｜個人網站",
     toggle: "EN",
     eyebrow: "個人網站",
-    heroTitle: "UX Intern × 攝影愛好者",
-    heroSubtitle: "我是一位大一學生，目前在一個 stealth startup 擔任 UX Intern。平常最喜歡用影像觀察生活，把情緒、光線與故事留下來。",
+    heroTitle: "流行音樂 × 攝影",
+    heroSubtitle:
+      "我是一位大一學生，主修流行音樂，平常喜歡用影像觀察生活，把情緒、光線與故事留下來。",
     heroDescription:
-      "我還在學習設計與影像創作。做 UX 練習時，我會注意使用者怎麼操作；拍照時，我會觀察光線、空間和情緒。這個網站整理了我目前的作品與練習紀錄。",
+      "我還在學習影像創作與說故事的方式。拍照與剪輯時，我會留意光線、空間和情緒。這個網站整理了我目前的作品與練習紀錄。",
     chipInterest: "興趣：攝影",
     chipCamera: "相機：Canon R6 Mark II",
     chipLens: "鏡頭：Canon RF 24-105mm",
-    aboutTitle: "關於我",
+    aboutTitle: "劉宜芳",
     aboutDesc: "個人簡介",
     aboutBody:
-      "我目前是台北城市科技大學流行音樂事業系大一學生，並在一間 stealth startup 擔任 UX Intern。過去從音樂學習出發，後來透過拍照與剪輯接觸影像創作，也參與過校內外演出、MV 製作與音樂祭攝影。現在的我正在持續累積作品與實作經驗，慢慢建立自己的影像風格。",
+      "我目前在一間 stealth startup 擔任 UX Intern，也是台北城市科技大學流行音樂事業系大一學生。過去從音樂學習出發，後來透過拍照與剪輯接觸影像創作，也參與過校內外演出、MV 製作與音樂祭攝影。現在的我正在持續累積作品與實作經驗，慢慢建立自己的影像風格。",
     aboutPoint1: "台北城市科技大學流行音樂事業系大一學生。",
     aboutPoint2: "目前在 stealth startup 擔任 UX Intern。",
     aboutPoint3: "從音樂學習延伸到攝影與剪輯創作。",
@@ -57,10 +58,15 @@ const i18n = {
     videoDescription: "動態作品是我在剪輯與敘事上的練習，主要嘗試節奏安排、轉場和情緒鋪陳。",
     videoLinkOne: "作品連結一",
     videoLinkTwo: "作品連結二",
-    coverTag: "封面作品",
     coverTitle: "Photographer in Focus",
     coverNote: "在快節奏與安靜時刻之間，我用相機記下每一個值得被記得的瞬間。",
     closingNote: "謝謝你瀏覽我的作品集。這裡記錄了我目前的學習與創作，也歡迎交流想法。",
+    navHome: "首頁",
+    navAbout: "關於我",
+    navGallery: "作品集與影片",
+    carouselDotsLabel: "輪播指示器",
+    videoIframeTitle1: "影片作品（一）",
+    videoIframeTitle2: "影片作品（二）",
     exploreBtn: "查看作品",
     prevSlide: "上一張",
     nextSlide: "下一張",
@@ -75,30 +81,31 @@ const i18n = {
       "Street snap 2025": "街拍 2025",
     },
     categoryBlurbs: {
-      Art: "抽象構圖與色彩層次練習。",
-      Cat: "街頭中的可愛瞬間與生活節奏。",
-      Family: "日常互動與情感紀錄。",
-      Me: "自我狀態與生活片段。",
-      School: "校園場景與光影觀察。",
-      "Street snap 2024": "2024 年的城市觀察與街頭切片。",
-      "Street snap 2025": "2025 年的街拍延伸與敘事嘗試。",
+      Art: "走進展演與藝術現場時留下的畫面。",
+      Cat: "路上偶遇的貓，還有牠們把街頭變慢的那一瞬間。",
+      Family: "和家人膩在一起的平凡片刻，把溫度留在鏡頭裡。",
+      Me: "對著鏡頭練習表達，也是記錄此刻自己的方式。",
+      School: "校園裡的光影、走廊與人群——把日常當成練習題。",
+      "Street snap 2024": "2024 年在街頭晃蕩時拾起的城市細節與巧合。",
+      "Street snap 2025": "2025 年延續街拍，多試一點故事感與視線的走向。",
     },
   },
   en: {
-    pageTitle: "Portfolio | UX Intern & Photographer",
+    pageTitle: "Yi Fang Liu's Website",
     toggle: "中",
     eyebrow: "Personal Website",
-    heroTitle: "UX Intern × Photographer",
-    heroSubtitle: "I am a first-year student and currently a UX intern at a stealth startup. I love capturing light, mood, and stories through photography.",
+    heroTitle: "Popular Music × Photography",
+    heroSubtitle:
+      "I'm a first-year student studying popular music. I love observing life through images—capturing light, mood, and stories.",
     heroDescription:
-      "I am still learning design and visual storytelling. In UX practice, I observe how people use products; in photography, I pay attention to light, space, and emotion. This site is a collection of my current projects and learning process.",
+      "I'm still learning visual storytelling. When I shoot or edit, I pay attention to light, space, and emotion. This site collects my current work and practice.",
     chipInterest: "Interest: Photography",
     chipCamera: "Camera: Canon R6 Mark II",
     chipLens: "Lens: Canon RF 24-105mm",
-    aboutTitle: "About Me",
+    aboutTitle: "Yi Fang Liu",
     aboutDesc: "Profile",
     aboutBody:
-      "I am a first-year student in the Department of Popular Music at TPCU, and currently a UX intern at a stealth startup. My journey started from music, then gradually expanded into photography and video editing. I have participated in school and external performances, MV production, and music festival photography. Right now, I am focused on building my portfolio and strengthening practical skills while developing my own visual style.",
+      "I am currently a UX intern at a stealth startup, and a first-year student in the Department of Popular Music at TPCU. My journey started from music, then gradually expanded into photography and video editing. I have participated in school and external performances, MV production, and music festival photography. Right now, I am focused on building my portfolio and strengthening practical skills while developing my own visual style.",
     aboutPoint1: "First-year student in the Department of Popular Music, TPCU.",
     aboutPoint2: "Currently a UX intern at a stealth startup.",
     aboutPoint3: "My creative journey has expanded from music to photography and video editing.",
@@ -110,28 +117,33 @@ const i18n = {
     skillPoint1: "Interests: piano, songwriting, photography, travel, and video editing.",
     skillPoint2: "Strengths: photography and post-production editing.",
     expTitle: "Experience",
-    expPoint1: "Chung-Hwa School of Arts Spring and Fall Exhibition Orchestra.",
+    expPoint1: "Chung-Hwa School of Arts Spring and Autumn Showcase: Ethnic Percussion and Orchestra.",
     expPoint2: "2023 Kaohsiung City Wind Festival, Taiwan Youth Flute Ensemble.",
     expPoint3: "Collaborated with Kun Shan University on MV production and recording.",
     expPoint4: "Photography team member at RISING STAR.",
-    imageTitle: "Image Works",
-    imageDesc: "Photo Portfolio",
+    imageTitle: "Still Photography",
+    imageDesc: "Photographs",
     imageDescription:
-      "These photos are grouped by themes such as art, street moments, family, and daily life. Each image is part of my ongoing practice in composition, tone, and visual storytelling.",
-    videoTitle: "Video Works",
-    videoDesc: "Motion Projects",
+      "These photographs are grouped by theme—art, street photography, family, and everyday life. Each image comes from observing daily life and reflects my ongoing practice in composition and color grading.",
+    videoTitle: "Video",
+    videoDesc: "Film & video",
     videoDescription:
-      "These video works are part of my editing and storytelling practice, focusing on pacing, transitions, and emotional flow.",
-    videoLinkOne: "Video Link 1",
-    videoLinkTwo: "Video Link 2",
-    coverTag: "Featured Portrait",
+      "My video work is practice in editing and storytelling—I focus on pacing, transitions, and emotional build-up.",
+    videoLinkOne: "Work link 1",
+    videoLinkTwo: "Work link 2",
     coverTitle: "Photographer in Focus",
     coverNote: "Between fast-paced days and quiet moments, I capture the scenes worth remembering.",
     closingNote: "Thanks for visiting my portfolio. This site documents my current learning journey, and I am always happy to connect and learn from feedback.",
+    navHome: "Home",
+    navAbout: "About",
+    navGallery: "Gallery & Video",
+    carouselDotsLabel: "Carousel indicators",
+    videoIframeTitle1: "Video 1",
+    videoIframeTitle2: "Video 2",
     exploreBtn: "Explore Works",
-    prevSlide: "Previous slide",
-    nextSlide: "Next slide",
-    dotLabel: "Go to slide {index}",
+    prevSlide: "Previous image",
+    nextSlide: "Next image",
+    dotLabel: "Go to image {index}",
     categories: {
       Art: "Art",
       Cat: "Cat",
@@ -142,13 +154,13 @@ const i18n = {
       "Street snap 2025": "Street 2025",
     },
     categoryBlurbs: {
-      Art: "Abstract framing and color studies.",
-      Cat: "Playful street moments with cats.",
-      Family: "Everyday emotions and family memories.",
-      Me: "Personal moments and self-observation.",
-      School: "Campus scenes with light exploration.",
-      "Street snap 2024": "City fragments captured in 2024.",
-      "Street snap 2025": "Street narratives continued in 2025.",
+      Art: "Images captured while visiting performances and art spaces.",
+      Cat: "Cats I meet on the street—and the moment they slow the city down.",
+      Family: "Ordinary moments close with family—keeping the warmth in the frame.",
+      Me: "Practicing how I express myself to the lens—a way to record who I am right now.",
+      School: "Light, corridors, and crowds on campus—treating everyday life as practice.",
+      "Street snap 2024": "Urban details and chance encounters gathered while wandering the streets in 2024.",
+      "Street snap 2025": "Continuing street photography in 2025—pushing further into story and where the eye travels.",
     },
   },
 };
@@ -309,12 +321,28 @@ const applyLanguage = () => {
   translateText("videoDescription", t.videoDescription);
   translateText("videoLinkOne", t.videoLinkOne);
   translateText("videoLinkTwo", t.videoLinkTwo);
-  translateText("coverTag", t.coverTag);
   translateText("coverTitle", t.coverTitle);
   translateText("coverNote", t.coverNote);
   translateText("closingNote", t.closingNote);
   translateText("exploreBtn", t.exploreBtn);
+  translateText("navHome", t.navHome);
+  translateText("navAbout", t.navAbout);
+  translateText("navGallery", t.navGallery);
   translateText("langToggle", t.toggle);
+
+  const carouselDotsEl = document.getElementById("carouselDots");
+  if (carouselDotsEl && t.carouselDotsLabel) {
+    carouselDotsEl.setAttribute("aria-label", t.carouselDotsLabel);
+  }
+
+  const videoEmbed1 = document.getElementById("videoEmbed1");
+  const videoEmbed2 = document.getElementById("videoEmbed2");
+  if (videoEmbed1 && t.videoIframeTitle1) {
+    videoEmbed1.setAttribute("title", t.videoIframeTitle1);
+  }
+  if (videoEmbed2 && t.videoIframeTitle2) {
+    videoEmbed2.setAttribute("title", t.videoIframeTitle2);
+  }
 
   if (prevSlideBtn) prevSlideBtn.setAttribute("aria-label", t.prevSlide);
   if (nextSlideBtn) nextSlideBtn.setAttribute("aria-label", t.nextSlide);
@@ -324,17 +352,25 @@ const applyLanguage = () => {
     tab.textContent = t.categories[key] || key;
   });
 
-  updateCarousel();
+  if (carouselTrack && dotsContainer) {
+    renderSlides();
+  } else {
+    updateCarousel();
+  }
 };
 
 const renderSlides = () => {
   if (!carouselTrack || !dotsContainer) return;
   const images = categoryImages[currentCategory];
+  const categoryLabel = i18n[currentLang].categories[currentCategory] || currentCategory;
   carouselTrack.innerHTML = images
-    .map(
-      (src, idx) =>
-        `<article class="slide"><img src="${src}" alt="${currentCategory} ${idx + 1}" loading="lazy" /></article>`
-    )
+    .map((src, idx) => {
+      const alt =
+        currentLang === "zh"
+          ? `${categoryLabel}，第 ${idx + 1} 張`
+          : `${categoryLabel} ${idx + 1}`;
+      return `<article class="slide"><img src="${src}" alt="${alt}" loading="lazy" /></article>`;
+    })
     .join("");
 
   dotsContainer.innerHTML = images

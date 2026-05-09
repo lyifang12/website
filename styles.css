@@ -167,8 +167,13 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 45%;
-  background: linear-gradient(to top, rgba(44, 58, 92, 0.32), rgba(44, 58, 92, 0));
+  height: 58%;
+  background: linear-gradient(
+    to top,
+    rgba(10, 14, 26, 0.82) 0%,
+    rgba(10, 14, 26, 0.42) 48%,
+    rgba(10, 14, 26, 0) 100%
+  );
 }
 
 .cover-content {
@@ -176,42 +181,54 @@ body {
   left: clamp(18px, 4vw, 42px);
   bottom: clamp(10px, 2.6vw, 18px);
   z-index: 2;
-}
-
-.cover-tag {
-  margin: 0 0 6px;
-  color: #d4d9ea;
-  font-size: 0.9rem;
+  max-width: min(52ch, calc(100% - clamp(36px, 8vw, 84px)));
+  padding: clamp(12px, 2vw, 18px) clamp(14px, 2.4vw, 22px);
+  border-radius: 18px;
+  background: rgba(12, 18, 34, 0.46);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .cover-title {
-  margin: 0 0 6px;
+  margin: 0 0 8px;
   font-size: 1.2rem;
-  line-height: 1.1;
+  line-height: 1.15;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 
 .cover-note {
   display: block;
-  margin: 0 0 6px;
-  max-width: 56ch;
-  color: #f3f6ff;
+  margin: 0 0 12px;
+  max-width: none;
+  color: rgba(248, 250, 255, 0.96);
   font-size: 0.86rem;
+  line-height: 1.55;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.42);
 }
 
 .cover-cta {
-  border: 1px solid rgba(255, 255, 255, 0.45);
+  display: inline-block;
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 999px;
-  background: rgba(45, 66, 116, 0.6);
+  background: rgba(255, 255, 255, 0.16);
   color: #fff;
-  padding: 6px 10px;
+  padding: 8px 14px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
+  text-decoration: none;
+  text-shadow: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
 }
 
 .cover-cta:hover {
-  border-color: var(--accent-2);
-  color: var(--accent-2);
+  border-color: #fff;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.26);
 }
 
 .hero {
@@ -598,6 +615,7 @@ h1 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
+  margin-top: 24px;
 }
 
 .video {

@@ -3,16 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gallery | Portfolio</title>
+    <title>劉宜芳｜個人網站</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main class="wrap">
       <div class="top-bar">
         <nav class="top-nav">
-          <a class="nav-link" href="index.html">Home</a>
-          <a class="nav-link" href="about.html">About</a>
-          <a class="nav-link" href="gallery.html">Gallery & Video</a>
+          <a class="nav-link" id="navHome" href="index.html">首頁</a>
+          <a class="nav-link" id="navAbout" href="about.html">關於我</a>
+          <a class="nav-link" id="navGallery" href="gallery.html">作品集與影片</a>
         </nav>
         <div class="top-actions">
           <button class="lang-toggle" id="langToggle" type="button">EN</button>
@@ -32,19 +32,19 @@
       <section class="section" id="imageSection">
         <div class="section-header">
           <h2 class="section-title" id="imageTitle">靜態作品</h2>
-          <p class="section-desc" id="imageDesc">Image Works</p>
+          <p class="section-desc" id="imageDesc">影像作品</p>
         </div>
         <p class="body-copy" id="imageDescription">
           這些照片依主題分類，包含藝術、街拍、家庭與日常紀錄。每一張都來自我的生活觀察，也是我持續練習構圖與色調的過程。
         </p>
         <div class="category-tabs" id="categoryTabs">
-          <button class="tab-btn" data-category="Art" type="button">Art</button>
-          <button class="tab-btn is-active" data-category="Cat" type="button">Cat</button>
-          <button class="tab-btn" data-category="Family" type="button">Family</button>
-          <button class="tab-btn" data-category="Me" type="button">Me</button>
-          <button class="tab-btn" data-category="School" type="button">School</button>
-          <button class="tab-btn" data-category="Street snap 2024" type="button">Street 2024</button>
-          <button class="tab-btn" data-category="Street snap 2025" type="button">Street 2025</button>
+          <button class="tab-btn" data-category="Art" type="button">藝術</button>
+          <button class="tab-btn is-active" data-category="Cat" type="button">貓</button>
+          <button class="tab-btn" data-category="Family" type="button">家庭</button>
+          <button class="tab-btn" data-category="Me" type="button">我</button>
+          <button class="tab-btn" data-category="School" type="button">學校</button>
+          <button class="tab-btn" data-category="Street snap 2024" type="button">街拍 2024</button>
+          <button class="tab-btn" data-category="Street snap 2025" type="button">街拍 2025</button>
         </div>
         <p class="category-blurb" id="categoryBlurb">街頭中的可愛瞬間與生活節奏。</p>
         <div class="carousel">
@@ -56,7 +56,7 @@
         </div>
         <div class="carousel-dots" id="carouselDots" aria-label="輪播指示器"></div>
         <div class="carousel-meta">
-          <span id="carouselCategory">Cat</span>
+          <span id="carouselCategory">貓</span>
           <span id="carouselCounter">1 / 1</span>
         </div>
       </section>
@@ -64,22 +64,24 @@
       <section class="section">
         <div class="section-header">
           <h2 class="section-title" id="videoTitle">動態作品</h2>
-          <p class="section-desc" id="videoDesc">Video Works</p>
+          <p class="section-desc" id="videoDesc">影片作品</p>
         </div>
         <p class="body-copy" id="videoDescription">動態作品是我在剪輯與敘事上的練習，主要嘗試節奏安排、轉場和情緒鋪陳。</p>
         <div class="videos">
           <div class="video">
             <iframe
+              id="videoEmbed1"
               src="https://www.youtube.com/embed/1L9mmsNUsvU"
-              title="Video project 1"
+              title="影片作品（一）"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowfullscreen
             ></iframe>
           </div>
           <div class="video">
             <iframe
+              id="videoEmbed2"
               src="https://www.youtube.com/embed/J5TfM_7JMHc"
-              title="Video project 2"
+              title="影片作品（二）"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowfullscreen
             ></iframe>
