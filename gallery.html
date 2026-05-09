@@ -50,13 +50,38 @@
         <p class="category-blurb" id="categoryBlurb">街頭中的可愛瞬間與生活節奏。</p>
         <div class="carousel">
           <button class="carousel-nav prev" id="prevSlide" aria-label="上一張" type="button">&#10094;</button>
-          <div class="carousel-viewport">
-            <div class="carousel-track" id="carouselTrack"></div>
+          <div class="carousel-viewport-shell">
+            <div
+              class="carousel-load-overlay"
+              id="carouselLoadOverlay"
+              aria-hidden="true"
+              aria-busy="false"
+              aria-live="polite"
+            >
+              <div class="carousel-load-panel">
+                <div class="carousel-load-spinner" aria-hidden="true"></div>
+                <p class="carousel-load-label" id="carouselLoadLabel"></p>
+                <div
+                  class="carousel-load-track"
+                  id="carouselLoadTrack"
+                  role="progressbar"
+                  aria-valuemin="0"
+                  aria-valuemax="1"
+                  aria-valuenow="0"
+                  aria-labelledby="carouselLoadLabel"
+                >
+                  <div class="carousel-load-fill" id="carouselLoadFill"></div>
+                </div>
+                <p class="carousel-load-count" id="carouselLoadCount"></p>
+              </div>
+            </div>
+            <div class="carousel-viewport">
+              <div class="carousel-track" id="carouselTrack"></div>
+            </div>
           </div>
           <button class="carousel-nav next" id="nextSlide" aria-label="下一張" type="button">&#10095;</button>
         </div>
         <div class="carousel-dots" id="carouselDots" aria-label="輪播指示器"></div>
-        <p class="carousel-load-status" id="carouselLoadStatus" hidden aria-live="polite"></p>
         <div class="carousel-meta">
           <span id="carouselCategory">貓</span>
           <span id="carouselCounter">1 / 1</span>

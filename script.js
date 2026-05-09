@@ -66,13 +66,14 @@ const i18n = {
     navAbout: "關於我",
     navGallery: "作品集與影片",
     carouselDotsLabel: "輪播指示器",
+    carouselLoadLabel: "載入照片中…",
+    carouselLoadCount: "{loaded} / {total}",
     videoIframeTitle1: "影片作品（一）",
     videoIframeTitle2: "影片作品（二）",
     exploreBtn: "查看作品",
     prevSlide: "上一張",
     nextSlide: "下一張",
     dotLabel: "跳到第 {index} 張",
-    carouselLoadingProgress: "載入相片 {loaded} / {total}",
     categories: {
       Art: "藝術",
       Cat: "貓",
@@ -141,13 +142,14 @@ const i18n = {
     navAbout: "About",
     navGallery: "Gallery & Video",
     carouselDotsLabel: "Carousel indicators",
+    carouselLoadLabel: "Loading photos…",
+    carouselLoadCount: "{loaded} / {total}",
     videoIframeTitle1: "Video 1",
     videoIframeTitle2: "Video 2",
     exploreBtn: "Explore Works",
     prevSlide: "Previous image",
     nextSlide: "Next image",
     dotLabel: "Go to image {index}",
-    carouselLoadingProgress: "Loading photos {loaded} / {total}",
     categories: {
       Art: "Art",
       Cat: "Cat",
@@ -274,95 +276,93 @@ const langToggle = document.getElementById("langToggle");
 const coverSection = document.getElementById("coverSection");
 const exploreBtn = document.getElementById("exploreBtn");
 const imageSection = document.getElementById("imageSection");
+const carouselLoadOverlay = document.getElementById("carouselLoadOverlay");
+const carouselLoadFill = document.getElementById("carouselLoadFill");
+const carouselLoadLabel = document.getElementById("carouselLoadLabel");
+const carouselLoadCount = document.getElementById("carouselLoadCount");
+const carouselLoadTrack = document.getElementById("carouselLoadTrack");
 
 let currentCategory = "Cat";
 let currentIndex = 0;
 let autoplayTimer = null;
 let currentLang = localStorage.getItem("portfolio_lang") || "zh";
-let carouselLoadGeneration = 0;
-
-const countLoadedSlides = (urls) => {
-  const slides = carouselTrack?.querySelectorAll(".slide");
-  if (!slides?.length) return 0;
-  let c = 0;
-  urls.forEach((u, i) => {
-    const img = slides[i]?.querySelector("img");
-    if (img?.dataset.loadedSrc === u) c += 1;
-  });
-  return c;
-};
-
-const updateCarouselLoadStatus = (loaded, total) => {
-  const el = document.getElementById("carouselLoadStatus");
-  if (!el) return;
-  if (!total || loaded >= total) {
-    el.textContent = "";
-    el.hidden = true;
-    return;
-  }
-  el.hidden = false;
-  const tpl = i18n[currentLang].carouselLoadingProgress;
-  el.textContent = tpl.replace("{loaded}", String(loaded)).replace("{total}", String(total));
-};
-
-const loadSlideImage = (slide, url) => {
-  const img = slide?.querySelector("img");
-  if (!img || img.dataset.loadedSrc === url) {
-    if (img?.dataset.loadedSrc === url) slide?.classList.remove("is-loading");
-    return Promise.resolve();
-  }
-  slide.classList.add("is-loading");
-  return new Promise((resolve) => {
-    const finish = () => {
-      img.dataset.loadedSrc = url;
-      slide.classList.remove("is-loading");
-      resolve();
-    };
-    img.addEventListener("load", finish, { once: true });
-    img.addEventListener("error", finish, { once: true });
-    img.src = url;
-  });
-};
-
-const slidePrefetchOrder = (start, len) => {
-  const o = [];
-  for (let i = 0; i < len; i += 1) o.push((start + i) % len);
-  return o;
-};
-
-const runSequentialCarouselLoads = async (gen) => {
-  const urls = categoryImages[currentCategory];
-  const n = urls.length;
-  const slides = carouselTrack?.querySelectorAll(".slide");
-  if (!slides?.length) return;
-  updateCarouselLoadStatus(countLoadedSlides(urls), n);
-  const order = slidePrefetchOrder(currentIndex, n);
-  for (const idx of order) {
-    if (gen !== carouselLoadGeneration) return;
-    await loadSlideImage(slides[idx], urls[idx]);
-    if (gen !== carouselLoadGeneration) return;
-    updateCarouselLoadStatus(countLoadedSlides(urls), n);
-  }
-};
-
-const ensureCurrentSlideLoaded = () => {
-  if (!carouselTrack) return;
-  const urls = categoryImages[currentCategory];
-  const slides = carouselTrack.querySelectorAll(".slide");
-  const slide = slides[currentIndex];
-  if (!slide || !urls.length) return;
-  const gen = carouselLoadGeneration;
-  void loadSlideImage(slide, urls[currentIndex]).then(() => {
-    if (gen !== carouselLoadGeneration) return;
-    updateCarouselLoadStatus(countLoadedSlides(urls), urls.length);
-  });
-};
+let carouselLoadSafetyTimer = null;
+let carouselProgressState = { loaded: 0, total: 0 };
 
 const translateText = (id, value) => {
   const el = document.getElementById(id);
   if (el) {
     el.textContent = value;
   }
+};
+
+const hideCarouselLoading = () => {
+  if (carouselLoadSafetyTimer !== null) {
+    window.clearTimeout(carouselLoadSafetyTimer);
+    carouselLoadSafetyTimer = null;
+  }
+  if (!carouselLoadOverlay) return;
+  carouselLoadOverlay.classList.remove("is-active");
+  carouselLoadOverlay.setAttribute("aria-hidden", "true");
+  carouselLoadOverlay.setAttribute("aria-busy", "false");
+};
+
+const updateCarouselLoadingProgress = (loaded, total) => {
+  carouselProgressState = { loaded, total };
+  const t = i18n[currentLang];
+  if (carouselLoadLabel) carouselLoadLabel.textContent = t.carouselLoadLabel;
+  if (carouselLoadCount) {
+    carouselLoadCount.textContent = t.carouselLoadCount
+      .replace("{loaded}", String(loaded))
+      .replace("{total}", String(total));
+  }
+  const pct = total > 0 ? Math.round((loaded / total) * 100) : 100;
+  if (carouselLoadFill) carouselLoadFill.style.width = `${pct}%`;
+  if (carouselLoadTrack) {
+    carouselLoadTrack.setAttribute("aria-valuemax", String(Math.max(total, 1)));
+    carouselLoadTrack.setAttribute("aria-valuenow", String(loaded));
+  }
+};
+
+const bindCarouselImageLoads = () => {
+  if (!carouselTrack) return;
+  hideCarouselLoading();
+
+  const imgs = carouselTrack.querySelectorAll("img");
+  const total = imgs.length;
+  if (total === 0) return;
+
+  carouselLoadOverlay?.classList.add("is-active");
+  carouselLoadOverlay?.setAttribute("aria-hidden", "false");
+  carouselLoadOverlay?.setAttribute("aria-busy", "true");
+  updateCarouselLoadingProgress(0, total);
+
+  carouselLoadSafetyTimer = window.setTimeout(() => {
+    hideCarouselLoading();
+  }, 45000);
+
+  let loaded = 0;
+  const bump = () => {
+    loaded += 1;
+    updateCarouselLoadingProgress(loaded, total);
+    if (loaded >= total) {
+      if (carouselLoadSafetyTimer !== null) {
+        window.clearTimeout(carouselLoadSafetyTimer);
+        carouselLoadSafetyTimer = null;
+      }
+      carouselLoadSafetyTimer = window.setTimeout(() => {
+        hideCarouselLoading();
+      }, 220);
+    }
+  };
+
+  imgs.forEach((img) => {
+    if (img.complete && img.naturalWidth > 0) bump();
+    else {
+      img.addEventListener("load", bump, { once: true });
+      img.addEventListener("error", bump, { once: true });
+    }
+  });
 };
 
 const applyLanguage = () => {
@@ -435,22 +435,19 @@ const applyLanguage = () => {
     tab.textContent = t.categories[key] || key;
   });
 
+  if (carouselLoadOverlay?.classList.contains("is-active")) {
+    updateCarouselLoadingProgress(carouselProgressState.loaded, carouselProgressState.total);
+  }
+
   if (carouselTrack && dotsContainer) {
     renderSlides();
   } else {
     updateCarousel();
   }
-
-  const urlsFallback = categoryImages[currentCategory];
-  if (carouselTrack && urlsFallback?.length) {
-    updateCarouselLoadStatus(countLoadedSlides(urlsFallback), urlsFallback.length);
-  }
 };
 
 const renderSlides = () => {
   if (!carouselTrack || !dotsContainer) return;
-  carouselLoadGeneration += 1;
-  const gen = carouselLoadGeneration;
   const images = categoryImages[currentCategory];
   const categoryLabel = i18n[currentLang].categories[currentCategory] || currentCategory;
   carouselTrack.innerHTML = images
@@ -459,8 +456,7 @@ const renderSlides = () => {
         currentLang === "zh"
           ? `${categoryLabel}，第 ${idx + 1} 張`
           : `${categoryLabel} ${idx + 1}`;
-      const safeAlt = alt.replace(/"/g, "&quot;");
-      return `<article class="slide is-loading"><div class="slide-loader" aria-hidden="true"><span class="slide-spinner"></span></div><img alt="${safeAlt}" decoding="async" /></article>`;
+      return `<article class="slide"><img src="${src}" alt="${alt}" loading="eager" decoding="async" /></article>`;
     })
     .join("");
 
@@ -474,7 +470,7 @@ const renderSlides = () => {
 
   currentIndex = 0;
   updateCarousel();
-  void runSequentialCarouselLoads(gen);
+  bindCarouselImageLoads();
 };
 
 const updateCarousel = () => {
@@ -491,7 +487,6 @@ const updateCarousel = () => {
   if (categoryBlurb) {
     categoryBlurb.textContent = i18n[currentLang].categoryBlurbs[currentCategory] || "";
   }
-  ensureCurrentSlideLoaded();
 };
 
 const nextSlide = () => {
