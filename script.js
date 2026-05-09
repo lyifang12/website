@@ -66,9 +66,7 @@ const i18n = {
     navAbout: "關於我",
     navGallery: "作品集與影片",
     carouselDotsLabel: "輪播指示器",
-    bootLoadingLabel: "正在載入相片資源…",
-    carouselLoadLabel: "載入照片中…",
-    carouselLoadCount: "{loaded} / {total}",
+    mediaLoadingLabel: "載入中…",
     videoIframeTitle1: "影片作品（一）",
     videoIframeTitle2: "影片作品（二）",
     exploreBtn: "查看作品",
@@ -143,9 +141,7 @@ const i18n = {
     navAbout: "About",
     navGallery: "Gallery & Video",
     carouselDotsLabel: "Carousel indicators",
-    bootLoadingLabel: "Loading all photos…",
-    carouselLoadLabel: "Loading photos…",
-    carouselLoadCount: "{loaded} / {total}",
+    mediaLoadingLabel: "Loading…",
     videoIframeTitle1: "Video 1",
     videoIframeTitle2: "Video 2",
     exploreBtn: "Explore Works",
@@ -300,58 +296,9 @@ const getGalleryPrefetchUrlPlan = () => {
 };
 
 const SITE_BOOT_STORAGE_KEY = "liu_site_media_boot_v1";
-const SITE_BOOT_DONUT_R = 52;
-const SITE_BOOT_DONUT_C = 2 * Math.PI * SITE_BOOT_DONUT_R;
-
-const ensureSiteBootOverlay = () => {
-  let el = document.getElementById("siteBootOverlay");
-  if (el) return el;
-  el = document.createElement("div");
-  el.id = "siteBootOverlay";
-  el.className = "site-boot-overlay site-boot-overlay--floating";
-  el.setAttribute("role", "progressbar");
-  el.setAttribute("aria-valuemin", "0");
-  el.setAttribute("aria-valuemax", "100");
-  el.setAttribute("aria-valuenow", "0");
-  el.innerHTML = `
-    <div class="site-boot-panel">
-      <div class="site-boot-donut-stage">
-        <svg class="site-boot-spinner-ring" viewBox="0 0 120 120" aria-hidden="true">
-          <circle cx="60" cy="60" r="58" fill="none" stroke="rgba(74, 109, 255, 0.22)" stroke-width="5" stroke-dasharray="36 330" stroke-linecap="round" />
-        </svg>
-        <svg class="site-boot-donut" viewBox="0 0 120 120" aria-hidden="true">
-          <defs>
-            <linearGradient id="siteBootGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#4a6dff" />
-              <stop offset="100%" stop-color="#2aa7b8" />
-            </linearGradient>
-          </defs>
-          <circle class="site-boot-donut-track" cx="60" cy="60" r="${SITE_BOOT_DONUT_R}" fill="none" stroke-width="10" />
-          <circle
-            class="site-boot-donut-ring"
-            cx="60"
-            cy="60"
-            r="${SITE_BOOT_DONUT_R}"
-            fill="none"
-            stroke-width="10"
-            stroke="url(#siteBootGrad)"
-            stroke-linecap="round"
-            stroke-dasharray="${SITE_BOOT_DONUT_C}"
-            stroke-dashoffset="${SITE_BOOT_DONUT_C}"
-            transform="rotate(-90 60 60)"
-          />
-        </svg>
-        <span class="site-boot-pct" id="siteBootPct">0%</span>
-      </div>
-      <p class="site-boot-label" id="siteBootLabel"></p>
-    </div>`;
-  document.body.appendChild(el);
-  return el;
-};
 
 /**
- * First visit this session: parallel-download gallery images in the background (does not block the UI).
- * Shows a small floating donut until complete; repeat visits skip via sessionStorage.
+ * First visit this session: parallel-download gallery images in the background (no UI).
  */
 const runSiteBootPrefetch = () => {
   const conn = typeof navigator !== "undefined" ? navigator.connection : undefined;
@@ -369,33 +316,15 @@ const runSiteBootPrefetch = () => {
     return;
   }
 
-  const overlay = ensureSiteBootOverlay();
-  const pctEl = document.getElementById("siteBootPct");
-  const labelEl = document.getElementById("siteBootLabel");
-  const ring = overlay.querySelector(".site-boot-donut-ring");
-
-  const langPack = i18n[currentLang] || i18n.zh;
-  if (labelEl) labelEl.textContent = langPack.bootLoadingLabel;
-
   let done = 0;
   const total = urls.length;
 
-  const updateUI = () => {
-    const p = total ? done / total : 1;
-    const pct = Math.round(p * 100);
-    if (pctEl) pctEl.textContent = `${pct}%`;
-    overlay.setAttribute("aria-valuenow", String(pct));
-    if (ring) ring.style.strokeDashoffset = String(SITE_BOOT_DONUT_C * (1 - p));
+  const bump = () => {
+    done += 1;
+    if (done >= total) {
+      sessionStorage.setItem(SITE_BOOT_STORAGE_KEY, "1");
+    }
   };
-
-  const finish = () => {
-    sessionStorage.setItem(SITE_BOOT_STORAGE_KEY, "1");
-    updateUI();
-    overlay.classList.add("site-boot-is-done");
-    window.setTimeout(() => overlay.remove(), 520);
-  };
-
-  updateUI();
 
   urls.forEach((src, idx) => {
     const img = new Image();
@@ -403,11 +332,6 @@ const runSiteBootPrefetch = () => {
     if ("fetchPriority" in img) {
       img.fetchPriority = idx < 6 ? "high" : "auto";
     }
-    const bump = () => {
-      done += 1;
-      updateUI();
-      if (done >= total) finish();
-    };
     img.addEventListener("load", bump, { once: true });
     img.addEventListener("error", bump, { once: true });
     img.src = src;
@@ -427,18 +351,10 @@ const langToggle = document.getElementById("langToggle");
 const coverSection = document.getElementById("coverSection");
 const exploreBtn = document.getElementById("exploreBtn");
 const imageSection = document.getElementById("imageSection");
-const carouselLoadOverlay = document.getElementById("carouselLoadOverlay");
-const carouselLoadFill = document.getElementById("carouselLoadFill");
-const carouselLoadLabel = document.getElementById("carouselLoadLabel");
-const carouselLoadCount = document.getElementById("carouselLoadCount");
-const carouselLoadTrack = document.getElementById("carouselLoadTrack");
-
 let currentCategory = "Cat";
 let currentIndex = 0;
 let autoplayTimer = null;
 let currentLang = localStorage.getItem("portfolio_lang") || "zh";
-let carouselLoadSafetyTimer = null;
-let carouselProgressState = { loaded: 0, total: 0 };
 
 const translateText = (id, value) => {
   const el = document.getElementById(id);
@@ -447,84 +363,72 @@ const translateText = (id, value) => {
   }
 };
 
-const hideCarouselLoading = () => {
-  if (carouselLoadSafetyTimer !== null) {
-    window.clearTimeout(carouselLoadSafetyTimer);
-    carouselLoadSafetyTimer = null;
-  }
-  if (!carouselLoadOverlay) return;
-  carouselLoadOverlay.classList.remove("is-active");
-  carouselLoadOverlay.setAttribute("aria-hidden", "true");
-  carouselLoadOverlay.setAttribute("aria-busy", "false");
+/** Inline markup for per-slide donut until the slide image finishes loading. */
+const SLIDE_LOADING_HTML = `
+    <div class="slide-load-overlay" aria-hidden="true">
+      <div class="media-loading-inner">
+        <div class="media-donut-indeterminate" aria-hidden="true">
+          <svg viewBox="0 0 120 120">
+            <circle class="media-donut-bg" cx="60" cy="60" r="52" fill="none" stroke-width="10" />
+            <circle class="media-donut-arc" cx="60" cy="60" r="52" fill="none" stroke-width="10" stroke-dasharray="100 227" stroke-linecap="round" transform="rotate(-90 60 60)" />
+          </svg>
+        </div>
+      </div>
+    </div>`;
+
+const dismissSlideLoadOverlay = (overlay) => {
+  if (!overlay || overlay.classList.contains("is-done")) return;
+  overlay.classList.add("is-done");
+  window.setTimeout(() => overlay.remove(), 320);
 };
 
-const updateCarouselLoadingProgress = (loaded, total) => {
-  carouselProgressState = { loaded, total };
-  const t = i18n[currentLang];
-  if (carouselLoadLabel) carouselLoadLabel.textContent = t.carouselLoadLabel;
-  if (carouselLoadCount) {
-    carouselLoadCount.textContent = t.carouselLoadCount
-      .replace("{loaded}", String(loaded))
-      .replace("{total}", String(total));
-  }
-  const pct = total > 0 ? Math.round((loaded / total) * 100) : 100;
-  if (carouselLoadFill) carouselLoadFill.style.width = `${pct}%`;
-  if (carouselLoadTrack) {
-    carouselLoadTrack.setAttribute("aria-valuemax", String(Math.max(total, 1)));
-    carouselLoadTrack.setAttribute("aria-valuenow", String(loaded));
-  }
-};
-
-const bindCarouselImageLoads = () => {
+const bindSlideImageLoads = () => {
   if (!carouselTrack) return;
-  hideCarouselLoading();
-
-  const imgs = carouselTrack.querySelectorAll("img");
-  const total = imgs.length;
-  if (total === 0) return;
-
-  carouselLoadOverlay?.classList.add("is-active");
-  carouselLoadOverlay?.setAttribute("aria-hidden", "false");
-  carouselLoadOverlay?.setAttribute("aria-busy", "true");
-  updateCarouselLoadingProgress(0, total);
-
-  carouselLoadSafetyTimer = window.setTimeout(() => {
-    hideCarouselLoading();
-  }, 45000);
-
-  let loaded = 0;
-  let overlayDismissed = false;
-
-  const dismissOverlay = () => {
-    if (overlayDismissed) return;
-    overlayDismissed = true;
-    if (carouselLoadSafetyTimer !== null) {
-      window.clearTimeout(carouselLoadSafetyTimer);
-      carouselLoadSafetyTimer = null;
-    }
-    carouselLoadSafetyTimer = window.setTimeout(() => {
-      hideCarouselLoading();
-      carouselLoadSafetyTimer = null;
-    }, 120);
-  };
-
-  imgs.forEach((img, idx) => {
-    const onImgDone = () => {
-      loaded += 1;
-      if (!overlayDismissed) {
-        updateCarouselLoadingProgress(loaded, total);
-      }
-      if (idx === 0) dismissOverlay();
-      if (loaded >= total) dismissOverlay();
+  carouselTrack.querySelectorAll(".slide-media-host img").forEach((img) => {
+    const host = img.closest(".slide-media-host");
+    const overlay = host?.querySelector(".slide-load-overlay");
+    const safety = window.setTimeout(() => dismissSlideLoadOverlay(overlay), 45000);
+    const done = () => {
+      window.clearTimeout(safety);
+      dismissSlideLoadOverlay(overlay);
     };
-
     if (img.complete && img.naturalWidth > 0) {
-      onImgDone();
+      window.clearTimeout(safety);
+      dismissSlideLoadOverlay(overlay);
     } else {
-      img.addEventListener("load", onImgDone, { once: true });
-      img.addEventListener("error", onImgDone, { once: true });
+      img.addEventListener("load", done, { once: true });
+      img.addEventListener("error", done, { once: true });
     }
   });
+};
+
+const setupIndeterminateMediaOverlay = (overlayEl, mediaEl) => {
+  if (!overlayEl || !mediaEl) return;
+  let ended = false;
+  const finish = () => {
+    if (ended || !overlayEl.isConnected) return;
+    ended = true;
+    overlayEl.classList.remove("is-active");
+    overlayEl.classList.add("is-done");
+    overlayEl.setAttribute("aria-busy", "false");
+    overlayEl.setAttribute("aria-hidden", "true");
+    window.setTimeout(() => {
+      overlayEl.hidden = true;
+    }, 340);
+  };
+
+  if (mediaEl instanceof HTMLImageElement) {
+    if (mediaEl.complete && mediaEl.naturalWidth > 0) {
+      finish();
+      return;
+    }
+    mediaEl.addEventListener("load", finish, { once: true });
+    mediaEl.addEventListener("error", finish, { once: true });
+    window.setTimeout(finish, 45000);
+  } else if (mediaEl instanceof HTMLIFrameElement) {
+    mediaEl.addEventListener("load", finish, { once: true });
+    window.setTimeout(finish, 18000);
+  }
 };
 
 const applyLanguage = () => {
@@ -568,6 +472,10 @@ const applyLanguage = () => {
   translateText("videoLinkTwo", t.videoLinkTwo);
   translateText("coverTitle", t.coverTitle);
   translateText("coverNote", t.coverNote);
+  translateText("coverMediaLoadLabel", t.mediaLoadingLabel);
+  translateText("aboutMediaLoadLabel", t.mediaLoadingLabel);
+  translateText("videoMediaLoadLabel1", t.mediaLoadingLabel);
+  translateText("videoMediaLoadLabel2", t.mediaLoadingLabel);
   translateText("closingNote", t.closingNote);
   translateText("exploreBtn", t.exploreBtn);
   translateText("navHome", t.navHome);
@@ -597,10 +505,6 @@ const applyLanguage = () => {
     tab.textContent = t.categories[key] || key;
   });
 
-  if (carouselLoadOverlay?.classList.contains("is-active")) {
-    updateCarouselLoadingProgress(carouselProgressState.loaded, carouselProgressState.total);
-  }
-
   if (carouselTrack && dotsContainer) {
     renderSlides();
   } else {
@@ -619,7 +523,7 @@ const renderSlides = () => {
           ? `${categoryLabel}，第 ${idx + 1} 張`
           : `${categoryLabel} ${idx + 1}`;
       const loadingMode = idx === 0 ? "eager" : "lazy";
-      return `<article class="slide"><img src="${src}" alt="${alt}" loading="${loadingMode}" decoding="async" /></article>`;
+      return `<article class="slide"><div class="slide-media-host">${SLIDE_LOADING_HTML}<img src="${src}" alt="${alt}" loading="${loadingMode}" decoding="async" /></div></article>`;
     })
     .join("");
 
@@ -633,7 +537,7 @@ const renderSlides = () => {
 
   currentIndex = 0;
   updateCarousel();
-  bindCarouselImageLoads();
+  bindSlideImageLoads();
 };
 
 const updateCarousel = () => {
@@ -790,3 +694,8 @@ applyLanguage();
 applyActiveNav();
 restartAutoplay();
 runSiteBootPrefetch();
+
+setupIndeterminateMediaOverlay(document.getElementById("coverMediaLoadOverlay"), document.querySelector(".cover-image"));
+setupIndeterminateMediaOverlay(document.getElementById("aboutMediaLoadOverlay"), document.querySelector(".about-photo"));
+setupIndeterminateMediaOverlay(document.getElementById("videoMediaLoadOverlay1"), document.getElementById("videoEmbed1"));
+setupIndeterminateMediaOverlay(document.getElementById("videoMediaLoadOverlay2"), document.getElementById("videoEmbed2"));

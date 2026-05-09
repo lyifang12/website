@@ -32,6 +32,33 @@
 
       <section class="cover" id="coverSection">
         <img class="cover-image" src="image/Me/558246424_18081624578071281_2870589451159513355_n.jpg" alt="Cover portrait" />
+        <div
+          class="media-loading-overlay is-active"
+          id="coverMediaLoadOverlay"
+          aria-busy="true"
+          aria-hidden="false"
+          aria-live="polite"
+        >
+          <div class="media-loading-inner">
+            <div class="media-donut-indeterminate" aria-hidden="true">
+              <svg viewBox="0 0 120 120">
+                <circle class="media-donut-bg" cx="60" cy="60" r="52" fill="none" stroke-width="10" />
+                <circle
+                  class="media-donut-arc"
+                  cx="60"
+                  cy="60"
+                  r="52"
+                  fill="none"
+                  stroke-width="10"
+                  stroke-dasharray="100 227"
+                  stroke-linecap="round"
+                  transform="rotate(-90 60 60)"
+                />
+              </svg>
+            </div>
+            <p class="media-loading-label" id="coverMediaLoadLabel"></p>
+          </div>
+        </div>
         <div class="cover-overlay"></div>
         <div class="cover-content">
           <h2 class="cover-title" id="coverTitle">Photographer in Focus</h2>

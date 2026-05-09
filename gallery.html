@@ -51,30 +51,6 @@
         <div class="carousel">
           <button class="carousel-nav prev" id="prevSlide" aria-label="上一張" type="button">&#10094;</button>
           <div class="carousel-viewport-shell">
-            <div
-              class="carousel-load-overlay"
-              id="carouselLoadOverlay"
-              aria-hidden="true"
-              aria-busy="false"
-              aria-live="polite"
-            >
-              <div class="carousel-load-panel">
-                <div class="carousel-load-spinner" aria-hidden="true"></div>
-                <p class="carousel-load-label" id="carouselLoadLabel"></p>
-                <div
-                  class="carousel-load-track"
-                  id="carouselLoadTrack"
-                  role="progressbar"
-                  aria-valuemin="0"
-                  aria-valuemax="1"
-                  aria-valuenow="0"
-                  aria-labelledby="carouselLoadLabel"
-                >
-                  <div class="carousel-load-fill" id="carouselLoadFill"></div>
-                </div>
-                <p class="carousel-load-count" id="carouselLoadCount"></p>
-              </div>
-            </div>
             <div class="carousel-viewport">
               <div class="carousel-track" id="carouselTrack"></div>
             </div>
@@ -95,7 +71,7 @@
         </div>
         <p class="body-copy" id="videoDescription">動態作品是我在剪輯與敘事上的練習，主要嘗試節奏安排、轉場和情緒鋪陳。</p>
         <div class="videos">
-          <div class="video">
+          <div class="video media-loading-host">
             <iframe
               id="videoEmbed1"
               src="https://www.youtube.com/embed/1L9mmsNUsvU"
@@ -103,8 +79,35 @@
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowfullscreen
             ></iframe>
+            <div
+              class="media-loading-overlay is-active"
+              id="videoMediaLoadOverlay1"
+              aria-busy="true"
+              aria-hidden="false"
+              aria-live="polite"
+            >
+              <div class="media-loading-inner">
+                <div class="media-donut-indeterminate" aria-hidden="true">
+                  <svg viewBox="0 0 120 120">
+                    <circle class="media-donut-bg" cx="60" cy="60" r="52" fill="none" stroke-width="10" />
+                    <circle
+                      class="media-donut-arc"
+                      cx="60"
+                      cy="60"
+                      r="52"
+                      fill="none"
+                      stroke-width="10"
+                      stroke-dasharray="100 227"
+                      stroke-linecap="round"
+                      transform="rotate(-90 60 60)"
+                    />
+                  </svg>
+                </div>
+                <p class="media-loading-label" id="videoMediaLoadLabel1"></p>
+              </div>
+            </div>
           </div>
-          <div class="video">
+          <div class="video media-loading-host">
             <iframe
               id="videoEmbed2"
               src="https://www.youtube.com/embed/J5TfM_7JMHc"
@@ -112,6 +115,33 @@
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowfullscreen
             ></iframe>
+            <div
+              class="media-loading-overlay is-active"
+              id="videoMediaLoadOverlay2"
+              aria-busy="true"
+              aria-hidden="false"
+              aria-live="polite"
+            >
+              <div class="media-loading-inner">
+                <div class="media-donut-indeterminate" aria-hidden="true">
+                  <svg viewBox="0 0 120 120">
+                    <circle class="media-donut-bg" cx="60" cy="60" r="52" fill="none" stroke-width="10" />
+                    <circle
+                      class="media-donut-arc"
+                      cx="60"
+                      cy="60"
+                      r="52"
+                      fill="none"
+                      stroke-width="10"
+                      stroke-dasharray="100 227"
+                      stroke-linecap="round"
+                      transform="rotate(-90 60 60)"
+                    />
+                  </svg>
+                </div>
+                <p class="media-loading-label" id="videoMediaLoadLabel2"></p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

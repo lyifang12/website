@@ -457,6 +457,7 @@ h1 {
 }
 
 .about-photo-frame {
+  position: relative;
   border-radius: 10px;
   overflow: hidden;
   width: 100%;
@@ -561,95 +562,121 @@ h1 {
   min-width: 0;
 }
 
-.carousel-load-overlay {
+/* ----- Media loading (donut) overlays ----- */
+
+.media-loading-host {
+  position: relative;
+}
+
+.media-loading-overlay {
   position: absolute;
   inset: 0;
-  z-index: 5;
+  z-index: 4;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 18px;
-  background: rgba(239, 244, 255, 0.88);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.28s ease, visibility 0.28s ease;
-  pointer-events: none;
-}
-
-.carousel-load-overlay.is-active {
+  padding: 12px;
+  border-radius: inherit;
+  background: rgba(239, 244, 255, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   opacity: 1;
   visibility: visible;
-  pointer-events: auto;
+  pointer-events: none;
+  transition: opacity 0.32s ease, visibility 0.32s ease;
 }
 
-.carousel-load-panel {
+.media-loading-overlay.is-done {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.media-loading-overlay[hidden] {
+  display: none !important;
+}
+
+.media-loading-inner {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 16px 20px;
+  gap: 10px;
   text-align: center;
 }
 
-.carousel-load-spinner {
-  width: 38px;
-  height: 38px;
-  border-radius: 999px;
-  border: 3px solid rgba(74, 109, 255, 0.2);
-  border-top-color: var(--accent);
-  animation: carousel-spin 0.85s linear infinite;
+.media-donut-indeterminate svg {
+  width: min(72px, 18vw);
+  height: min(72px, 18vw);
+  display: block;
+  animation: media-donut-spin 1.05s linear infinite;
 }
 
-.carousel-load-label {
+.media-donut-bg {
+  stroke: rgba(74, 109, 255, 0.14);
+}
+
+.media-donut-arc {
+  stroke: var(--accent);
+}
+
+.media-loading-label {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: 0.84rem;
   font-weight: 600;
-  color: var(--text-main);
-}
-
-.carousel-load-track {
-  width: min(260px, 72vw);
-  height: 8px;
-  border-radius: 999px;
-  background: rgba(74, 109, 255, 0.14);
-  overflow: hidden;
-}
-
-.carousel-load-fill {
-  height: 100%;
-  width: 0%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  transition: width 0.22s ease;
-}
-
-.carousel-load-count {
-  margin: 0;
-  font-size: 0.82rem;
   color: var(--text-sub);
-  font-variant-numeric: tabular-nums;
+  max-width: 14rem;
+  line-height: 1.35;
 }
 
-@keyframes carousel-spin {
+.cover .media-loading-overlay {
+  border-radius: inherit;
+}
+
+.slide-media-host {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 0;
+}
+
+.slide-load-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(242, 246, 255, 0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+
+.slide-load-overlay.is-done {
+  opacity: 0;
+}
+
+.slide-load-overlay .media-donut-indeterminate svg {
+  width: min(56px, 14vw);
+  height: min(56px, 14vw);
+}
+
+@keyframes media-donut-spin {
   to {
     transform: rotate(360deg);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .carousel-load-spinner {
+  .media-donut-indeterminate svg {
     animation: none;
-    border-color: rgba(74, 109, 255, 0.35);
-    border-top-color: var(--accent);
+    opacity: 0.85;
   }
 
-  .carousel-load-fill {
-    transition: none;
-  }
-
-  .carousel-load-overlay {
+  .media-loading-overlay,
+  .slide-load-overlay {
     transition: none;
   }
 }
@@ -675,7 +702,7 @@ h1 {
   padding: 10px;
 }
 
-.slide img {
+.slide-media-host img {
   width: auto;
   height: auto;
   max-width: 100%;
@@ -688,6 +715,7 @@ h1 {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: linear-gradient(to top, rgba(79, 108, 168, 0.18), rgba(79, 108, 168, 0));
   pointer-events: none;
 }
@@ -881,105 +909,5 @@ h1 {
   .about-photo-frame {
     max-height: min(520px, 62vh);
     aspect-ratio: 3 / 4;
-  }
-}
-
-/* ------------------------------ Site boot (background prefetch + floating donut) */
-
-.site-boot-overlay.site-boot-overlay--floating {
-  position: fixed;
-  right: max(1rem, env(safe-area-inset-right, 0px));
-  bottom: max(1rem, env(safe-area-inset-bottom, 0px));
-  left: auto;
-  top: auto;
-  z-index: 9999;
-  pointer-events: none;
-  opacity: 1;
-  transition: opacity 0.48s ease;
-}
-
-.site-boot-overlay.site-boot-is-done {
-  opacity: 0;
-}
-
-.site-boot-panel {
-  margin: 0;
-  max-width: 13.5rem;
-  padding: 0.75rem 0.9rem 0.85rem;
-  text-align: center;
-  background: var(--card);
-  border: 1px solid var(--card-border);
-  border-radius: 16px;
-  box-shadow:
-    0 10px 36px rgba(31, 42, 68, 0.12),
-    0 2px 8px rgba(74, 109, 255, 0.08);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.site-boot-donut-stage {
-  position: relative;
-  width: 108px;
-  height: 108px;
-  margin: 0 auto 0.45rem;
-}
-
-.site-boot-spinner-ring,
-.site-boot-donut {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.site-boot-spinner-ring {
-  animation: site-boot-spin 1.05s linear infinite;
-}
-
-.site-boot-donut-ring {
-  transition: stroke-dashoffset 0.22s ease-out;
-}
-
-.site-boot-donut-track {
-  stroke: rgba(70, 98, 150, 0.14);
-}
-
-.site-boot-pct {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--text-main);
-  z-index: 1;
-}
-
-.site-boot-label {
-  margin: 0;
-  font-size: 0.78rem;
-  line-height: 1.4;
-  color: var(--text-sub);
-}
-
-@keyframes site-boot-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .site-boot-spinner-ring {
-    animation: none;
-  }
-
-  .site-boot-donut-ring {
-    transition: none;
-  }
-
-  .site-boot-overlay.site-boot-overlay--floating {
-    transition: opacity 0.25s ease;
   }
 }
