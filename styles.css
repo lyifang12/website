@@ -79,8 +79,10 @@ body {
 
 .social-links {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   align-items: center;
+  justify-content: flex-end;
 }
 
 .social-link {
@@ -104,6 +106,23 @@ body {
   width: 19px;
   height: 19px;
   fill: currentColor;
+}
+
+.social-email {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main);
+  text-decoration: none;
+  border: 1px solid var(--card-border);
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+}
+
+.social-email:hover {
+  border-color: var(--accent-2);
+  color: var(--accent-2);
 }
 
 .sr-only {
@@ -373,6 +392,7 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  min-width: 0;
 }
 
 .about-page .about-grid {
@@ -394,6 +414,10 @@ h1 {
 
 .about-page .about-intro h1 {
   margin: 6px 0 8px;
+}
+
+.about-page .about-intro .body-copy {
+  overflow-wrap: break-word;
 }
 
 .about-page .about-intro .hero-top {
@@ -420,19 +444,41 @@ h1 {
   grid-column: 2;
   grid-row: 1 / span 2;
   align-self: start;
+  justify-self: stretch;
+  min-width: 0;
+  width: 100%;
+  position: sticky;
+  top: clamp(12px, 2vw, 28px);
+}
+
+/* English About page: vertically center portrait beside taller copy */
+html[lang="en"] .about-photo-panel {
+  align-self: center;
+  position: static;
+  top: auto;
 }
 
 .about-photo-panel .about-photo-card {
   width: 100%;
   max-width: 560px;
+  margin-left: auto;
+}
+
+.about-photo-frame {
+  border-radius: 10px;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  max-height: min(560px, 78vh);
+  background: #e8ecf5;
 }
 
 .about-photo {
   width: 100%;
+  height: 100%;
   display: block;
-  border-radius: 10px;
   object-fit: cover;
-  max-height: 560px;
+  object-position: center center;
 }
 
 .about-page .about-block {
@@ -690,6 +736,11 @@ h1 {
     justify-content: flex-end;
   }
 
+  .social-email {
+    font-size: 0.74rem;
+    padding: 6px 10px;
+  }
+
   .category-tabs {
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -725,8 +776,19 @@ h1 {
     margin-top: 14px;
   }
 
+  .about-photo-panel {
+    position: static;
+    margin-left: 0;
+  }
+
   .about-photo-panel .about-photo-card {
     margin-top: 14px;
     max-width: 100%;
+    margin-left: 0;
+  }
+
+  .about-photo-frame {
+    max-height: min(520px, 62vh);
+    aspect-ratio: 3 / 4;
   }
 }

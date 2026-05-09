@@ -30,6 +30,7 @@ const i18n = {
     chipInterest: "興趣：攝影",
     chipCamera: "相機：Canon R6 Mark II",
     chipLens: "鏡頭：Canon RF 24-105mm",
+    chipDevice: "設備：iPhone",
     aboutTitle: "劉宜芳",
     aboutDesc: "個人簡介",
     aboutBody:
@@ -102,6 +103,7 @@ const i18n = {
     chipInterest: "Interest: Photography",
     chipCamera: "Camera: Canon R6 Mark II",
     chipLens: "Lens: Canon RF 24-105mm",
+    chipDevice: "Device: iPhone",
     aboutTitle: "Yi Fang Liu",
     aboutDesc: "Profile",
     aboutBody:
@@ -295,6 +297,7 @@ const applyLanguage = () => {
   translateText("chipInterest", t.chipInterest);
   translateText("chipCamera", t.chipCamera);
   translateText("chipLens", t.chipLens);
+  translateText("chipDevice", t.chipDevice);
   translateText("aboutTitle", t.aboutTitle);
   translateText("aboutDesc", t.aboutDesc);
   translateText("aboutBody", t.aboutBody);
