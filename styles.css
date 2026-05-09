@@ -884,45 +884,44 @@ h1 {
   }
 }
 
-/* ------------------------------ Site boot (full prefetch + donut) */
+/* ------------------------------ Site boot (background prefetch + floating donut) */
 
-html.site-boot-lock {
-  overflow: hidden;
-}
-
-.site-boot-overlay {
+.site-boot-overlay.site-boot-overlay--floating {
   position: fixed;
-  inset: 0;
-  z-index: 99999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  background:
-    radial-gradient(circle at 50% 35%, rgba(115, 149, 255, 0.28), transparent 52%),
-    radial-gradient(circle at 85% 75%, rgba(42, 167, 184, 0.18), transparent 45%),
-    rgba(244, 247, 255, 0.94);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  right: max(1rem, env(safe-area-inset-right, 0px));
+  bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  left: auto;
+  top: auto;
+  z-index: 9999;
+  pointer-events: none;
   opacity: 1;
   transition: opacity 0.48s ease;
 }
 
 .site-boot-overlay.site-boot-is-done {
   opacity: 0;
-  pointer-events: none;
 }
 
 .site-boot-panel {
-  max-width: 22rem;
+  margin: 0;
+  max-width: 13.5rem;
+  padding: 0.75rem 0.9rem 0.85rem;
   text-align: center;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  box-shadow:
+    0 10px 36px rgba(31, 42, 68, 0.12),
+    0 2px 8px rgba(74, 109, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .site-boot-donut-stage {
   position: relative;
-  width: 136px;
-  height: 136px;
-  margin: 0 auto 1rem;
+  width: 108px;
+  height: 108px;
+  margin: 0 auto 0.45rem;
 }
 
 .site-boot-spinner-ring,
@@ -951,7 +950,7 @@ html.site-boot-lock {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--text-main);
@@ -960,8 +959,8 @@ html.site-boot-lock {
 
 .site-boot-label {
   margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.45;
+  font-size: 0.78rem;
+  line-height: 1.4;
   color: var(--text-sub);
 }
 
@@ -980,7 +979,7 @@ html.site-boot-lock {
     transition: none;
   }
 
-  .site-boot-overlay {
+  .site-boot-overlay.site-boot-overlay--floating {
     transition: opacity 0.25s ease;
   }
 }

@@ -308,7 +308,7 @@ const ensureSiteBootOverlay = () => {
   if (el) return el;
   el = document.createElement("div");
   el.id = "siteBootOverlay";
-  el.className = "site-boot-overlay";
+  el.className = "site-boot-overlay site-boot-overlay--floating";
   el.setAttribute("role", "progressbar");
   el.setAttribute("aria-valuemin", "0");
   el.setAttribute("aria-valuemax", "100");
@@ -345,30 +345,27 @@ const ensureSiteBootOverlay = () => {
       </div>
       <p class="site-boot-label" id="siteBootLabel"></p>
     </div>`;
-  document.body.insertAdjacentElement("afterbegin", el);
+  document.body.appendChild(el);
   return el;
 };
 
 /**
- * First visit this session: parallel-download every gallery-related image (ordered plan), donut progress overlay.
- * Then runs onReady (page init). Repeat visits use sessionStorage skip.
+ * First visit this session: parallel-download gallery images in the background (does not block the UI).
+ * Shows a small floating donut until complete; repeat visits skip via sessionStorage.
  */
-const runSiteBootPrefetch = (onReady) => {
+const runSiteBootPrefetch = () => {
   const conn = typeof navigator !== "undefined" ? navigator.connection : undefined;
   if (conn?.saveData) {
-    onReady?.();
     return;
   }
 
   if (sessionStorage.getItem(SITE_BOOT_STORAGE_KEY)) {
-    onReady?.();
     return;
   }
 
   const { urls } = getGalleryPrefetchUrlPlan();
   if (urls.length === 0) {
     sessionStorage.setItem(SITE_BOOT_STORAGE_KEY, "1");
-    onReady?.();
     return;
   }
 
@@ -379,8 +376,6 @@ const runSiteBootPrefetch = (onReady) => {
 
   const langPack = i18n[currentLang] || i18n.zh;
   if (labelEl) labelEl.textContent = langPack.bootLoadingLabel;
-
-  document.documentElement.classList.add("site-boot-lock");
 
   let done = 0;
   const total = urls.length;
@@ -395,9 +390,7 @@ const runSiteBootPrefetch = (onReady) => {
 
   const finish = () => {
     sessionStorage.setItem(SITE_BOOT_STORAGE_KEY, "1");
-    document.documentElement.classList.remove("site-boot-lock");
     updateUI();
-    onReady?.();
     overlay.classList.add("site-boot-is-done");
     window.setTimeout(() => overlay.remove(), 520);
   };
@@ -792,9 +785,8 @@ const applyActiveNav = () => {
   });
 };
 
-runSiteBootPrefetch(() => {
-  renderSlides();
-  applyLanguage();
-  applyActiveNav();
-  restartAutoplay();
-});
+renderSlides();
+applyLanguage();
+applyActiveNav();
+restartAutoplay();
+runSiteBootPrefetch();
