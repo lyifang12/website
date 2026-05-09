@@ -66,6 +66,7 @@ const i18n = {
     navAbout: "關於我",
     navGallery: "作品集與影片",
     carouselDotsLabel: "輪播指示器",
+    bootLoadingLabel: "正在載入相片資源…",
     carouselLoadLabel: "載入照片中…",
     carouselLoadCount: "{loaded} / {total}",
     videoIframeTitle1: "影片作品（一）",
@@ -142,6 +143,7 @@ const i18n = {
     navAbout: "About",
     navGallery: "Gallery & Video",
     carouselDotsLabel: "Carousel indicators",
+    bootLoadingLabel: "Loading all photos…",
     carouselLoadLabel: "Loading photos…",
     carouselLoadCount: "{loaded} / {total}",
     videoIframeTitle1: "Video 1",
@@ -297,51 +299,126 @@ const getGalleryPrefetchUrlPlan = () => {
   return { urls, shellCount, catCount };
 };
 
-const isHomePage = () => {
-  const leaf = (window.location.pathname.split("/").pop() || "").toLowerCase();
-  return leaf === "" || leaf === "index.html";
+const SITE_BOOT_STORAGE_KEY = "liu_site_media_boot_v1";
+const SITE_BOOT_DONUT_R = 52;
+const SITE_BOOT_DONUT_C = 2 * Math.PI * SITE_BOOT_DONUT_R;
+
+const ensureSiteBootOverlay = () => {
+  let el = document.getElementById("siteBootOverlay");
+  if (el) return el;
+  el = document.createElement("div");
+  el.id = "siteBootOverlay";
+  el.className = "site-boot-overlay";
+  el.setAttribute("role", "progressbar");
+  el.setAttribute("aria-valuemin", "0");
+  el.setAttribute("aria-valuemax", "100");
+  el.setAttribute("aria-valuenow", "0");
+  el.innerHTML = `
+    <div class="site-boot-panel">
+      <div class="site-boot-donut-stage">
+        <svg class="site-boot-spinner-ring" viewBox="0 0 120 120" aria-hidden="true">
+          <circle cx="60" cy="60" r="58" fill="none" stroke="rgba(74, 109, 255, 0.22)" stroke-width="5" stroke-dasharray="36 330" stroke-linecap="round" />
+        </svg>
+        <svg class="site-boot-donut" viewBox="0 0 120 120" aria-hidden="true">
+          <defs>
+            <linearGradient id="siteBootGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#4a6dff" />
+              <stop offset="100%" stop-color="#2aa7b8" />
+            </linearGradient>
+          </defs>
+          <circle class="site-boot-donut-track" cx="60" cy="60" r="${SITE_BOOT_DONUT_R}" fill="none" stroke-width="10" />
+          <circle
+            class="site-boot-donut-ring"
+            cx="60"
+            cy="60"
+            r="${SITE_BOOT_DONUT_R}"
+            fill="none"
+            stroke-width="10"
+            stroke="url(#siteBootGrad)"
+            stroke-linecap="round"
+            stroke-dasharray="${SITE_BOOT_DONUT_C}"
+            stroke-dashoffset="${SITE_BOOT_DONUT_C}"
+            transform="rotate(-90 60 60)"
+          />
+        </svg>
+        <span class="site-boot-pct" id="siteBootPct">0%</span>
+      </div>
+      <p class="site-boot-label" id="siteBootLabel"></p>
+    </div>`;
+  document.body.insertAdjacentElement("afterbegin", el);
+  return el;
 };
 
-/** Prefetch site + gallery photos from the homepage in priority order (warms cache before visiting About / Gallery). */
-const prefetchGalleryImagesInBackground = () => {
-  if (!isHomePage()) return;
-  const { urls, shellCount, catCount } = getGalleryPrefetchUrlPlan();
-  if (urls.length === 0) return;
+/**
+ * First visit this session: parallel-download every gallery-related image (ordered plan), donut progress overlay.
+ * Then runs onReady (page init). Repeat visits use sessionStorage skip.
+ */
+const runSiteBootPrefetch = (onReady) => {
   const conn = typeof navigator !== "undefined" ? navigator.connection : undefined;
-  if (conn?.saveData) return;
+  if (conn?.saveData) {
+    onReady?.();
+    return;
+  }
 
-  const idle =
-    typeof window.requestIdleCallback === "function"
-      ? (cb) => window.requestIdleCallback(cb, { timeout: 8000 })
-      : (cb) => window.setTimeout(cb, 1600);
+  if (sessionStorage.getItem(SITE_BOOT_STORAGE_KEY)) {
+    onReady?.();
+    return;
+  }
 
-  let cursor = 0;
-  const batchSize = 4;
-  const catEnd = shellCount + catCount;
+  const { urls } = getGalleryPrefetchUrlPlan();
+  if (urls.length === 0) {
+    sessionStorage.setItem(SITE_BOOT_STORAGE_KEY, "1");
+    onReady?.();
+    return;
+  }
 
-  const pump = () => {
-    const end = Math.min(cursor + batchSize, urls.length);
-    for (; cursor < end; cursor += 1) {
-      const src = urls[cursor];
-      const img = new Image();
-      img.decoding = "async";
-      if ("fetchPriority" in img) {
-        if (cursor < shellCount) {
-          img.fetchPriority = "high";
-        } else if (cursor < catEnd) {
-          img.fetchPriority = "auto";
-        } else {
-          img.fetchPriority = "low";
-        }
-      }
-      img.src = src;
-    }
-    if (cursor < urls.length) {
-      idle(pump);
-    }
+  const overlay = ensureSiteBootOverlay();
+  const pctEl = document.getElementById("siteBootPct");
+  const labelEl = document.getElementById("siteBootLabel");
+  const ring = overlay.querySelector(".site-boot-donut-ring");
+
+  const langPack = i18n[currentLang] || i18n.zh;
+  if (labelEl) labelEl.textContent = langPack.bootLoadingLabel;
+
+  document.documentElement.classList.add("site-boot-lock");
+
+  let done = 0;
+  const total = urls.length;
+
+  const updateUI = () => {
+    const p = total ? done / total : 1;
+    const pct = Math.round(p * 100);
+    if (pctEl) pctEl.textContent = `${pct}%`;
+    overlay.setAttribute("aria-valuenow", String(pct));
+    if (ring) ring.style.strokeDashoffset = String(SITE_BOOT_DONUT_C * (1 - p));
   };
 
-  idle(pump);
+  const finish = () => {
+    sessionStorage.setItem(SITE_BOOT_STORAGE_KEY, "1");
+    document.documentElement.classList.remove("site-boot-lock");
+    updateUI();
+    onReady?.();
+    overlay.classList.add("site-boot-is-done");
+    window.setTimeout(() => overlay.remove(), 520);
+  };
+
+  updateUI();
+
+  urls.forEach((src, idx) => {
+    const img = new Image();
+    img.decoding = "async";
+    if ("fetchPriority" in img) {
+      img.fetchPriority = idx < 6 ? "high" : "auto";
+    }
+    const bump = () => {
+      done += 1;
+      updateUI();
+      if (done >= total) finish();
+    };
+    img.addEventListener("load", bump, { once: true });
+    img.addEventListener("error", bump, { once: true });
+    img.src = src;
+  });
 };
 
 const categoryTabs = document.querySelectorAll(".tab-btn");
@@ -715,8 +792,9 @@ const applyActiveNav = () => {
   });
 };
 
-prefetchGalleryImagesInBackground();
-renderSlides();
-applyLanguage();
-applyActiveNav();
-restartAutoplay();
+runSiteBootPrefetch(() => {
+  renderSlides();
+  applyLanguage();
+  applyActiveNav();
+  restartAutoplay();
+});
