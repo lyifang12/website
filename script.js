@@ -66,7 +66,6 @@ const i18n = {
     navAbout: "關於我",
     navGallery: "作品集與影片",
     carouselDotsLabel: "輪播指示器",
-    mediaLoadingLabel: "載入中…",
     videoIframeTitle1: "影片作品（一）",
     videoIframeTitle2: "影片作品（二）",
     exploreBtn: "查看作品",
@@ -141,7 +140,6 @@ const i18n = {
     navAbout: "About",
     navGallery: "Gallery & Video",
     carouselDotsLabel: "Carousel indicators",
-    mediaLoadingLabel: "Loading…",
     videoIframeTitle1: "Video 1",
     videoIframeTitle2: "Video 2",
     exploreBtn: "Explore Works",
@@ -263,6 +261,46 @@ const categoryImages = {
 
 const ABOUT_PROFILE_SRC = "image/about-profile.png";
 
+const MEDIA_DONUT_PLACEHOLDER_HTML = `<div class="media-donut-placeholder" aria-hidden="true"><div class="media-donut-spinner" aria-hidden="true"></div></div>`;
+
+const initMediaDonutShells = (root) => {
+  if (!root) return;
+  root.querySelectorAll(".media-donut-shell[data-media-donut]").forEach((shell) => {
+    if (shell.dataset.donutBound === "1") return;
+    shell.dataset.donutBound = "1";
+    const media = shell.querySelector(".media-donut-fg img, .media-donut-fg iframe");
+    if (!media) return;
+    shell.setAttribute("aria-busy", "true");
+
+    const reveal = () => {
+      shell.classList.add("is-ready");
+      shell.setAttribute("aria-busy", "false");
+    };
+
+    if (media instanceof HTMLImageElement) {
+      if (media.complete && media.naturalWidth > 0) {
+        reveal();
+        return;
+      }
+      media.addEventListener("load", reveal, { once: true });
+      media.addEventListener("error", reveal, { once: true });
+      return;
+    }
+
+    if (media instanceof HTMLIFrameElement) {
+      let settled = false;
+      const run = () => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(fallbackTimer);
+        reveal();
+      };
+      const fallbackTimer = window.setTimeout(run, 14000);
+      media.addEventListener("load", run, { once: true });
+    }
+  });
+};
+
 /**
  * Prefetch order (homepage): Index cover → About photo → Cat album → other categories (object key order).
  * Returns ordered URLs plus segment lengths for fetchPriority hints.
@@ -351,6 +389,7 @@ const langToggle = document.getElementById("langToggle");
 const coverSection = document.getElementById("coverSection");
 const exploreBtn = document.getElementById("exploreBtn");
 const imageSection = document.getElementById("imageSection");
+
 let currentCategory = "Cat";
 let currentIndex = 0;
 let autoplayTimer = null;
@@ -360,74 +399,6 @@ const translateText = (id, value) => {
   const el = document.getElementById(id);
   if (el) {
     el.textContent = value;
-  }
-};
-
-/** Inline markup for per-slide donut until the slide image finishes loading. */
-const SLIDE_LOADING_HTML = `
-    <div class="slide-load-overlay" aria-hidden="true">
-      <div class="media-loading-inner">
-        <div class="media-donut-indeterminate" aria-hidden="true">
-          <svg viewBox="0 0 120 120">
-            <circle class="media-donut-bg" cx="60" cy="60" r="52" fill="none" stroke-width="10" />
-            <circle class="media-donut-arc" cx="60" cy="60" r="52" fill="none" stroke-width="10" stroke-dasharray="100 227" stroke-linecap="round" transform="rotate(-90 60 60)" />
-          </svg>
-        </div>
-      </div>
-    </div>`;
-
-const dismissSlideLoadOverlay = (overlay) => {
-  if (!overlay || overlay.classList.contains("is-done")) return;
-  overlay.classList.add("is-done");
-  window.setTimeout(() => overlay.remove(), 320);
-};
-
-const bindSlideImageLoads = () => {
-  if (!carouselTrack) return;
-  carouselTrack.querySelectorAll(".slide-media-host img").forEach((img) => {
-    const host = img.closest(".slide-media-host");
-    const overlay = host?.querySelector(".slide-load-overlay");
-    const safety = window.setTimeout(() => dismissSlideLoadOverlay(overlay), 45000);
-    const done = () => {
-      window.clearTimeout(safety);
-      dismissSlideLoadOverlay(overlay);
-    };
-    if (img.complete && img.naturalWidth > 0) {
-      window.clearTimeout(safety);
-      dismissSlideLoadOverlay(overlay);
-    } else {
-      img.addEventListener("load", done, { once: true });
-      img.addEventListener("error", done, { once: true });
-    }
-  });
-};
-
-const setupIndeterminateMediaOverlay = (overlayEl, mediaEl) => {
-  if (!overlayEl || !mediaEl) return;
-  let ended = false;
-  const finish = () => {
-    if (ended || !overlayEl.isConnected) return;
-    ended = true;
-    overlayEl.classList.remove("is-active");
-    overlayEl.classList.add("is-done");
-    overlayEl.setAttribute("aria-busy", "false");
-    overlayEl.setAttribute("aria-hidden", "true");
-    window.setTimeout(() => {
-      overlayEl.hidden = true;
-    }, 340);
-  };
-
-  if (mediaEl instanceof HTMLImageElement) {
-    if (mediaEl.complete && mediaEl.naturalWidth > 0) {
-      finish();
-      return;
-    }
-    mediaEl.addEventListener("load", finish, { once: true });
-    mediaEl.addEventListener("error", finish, { once: true });
-    window.setTimeout(finish, 45000);
-  } else if (mediaEl instanceof HTMLIFrameElement) {
-    mediaEl.addEventListener("load", finish, { once: true });
-    window.setTimeout(finish, 18000);
   }
 };
 
@@ -472,10 +443,6 @@ const applyLanguage = () => {
   translateText("videoLinkTwo", t.videoLinkTwo);
   translateText("coverTitle", t.coverTitle);
   translateText("coverNote", t.coverNote);
-  translateText("coverMediaLoadLabel", t.mediaLoadingLabel);
-  translateText("aboutMediaLoadLabel", t.mediaLoadingLabel);
-  translateText("videoMediaLoadLabel1", t.mediaLoadingLabel);
-  translateText("videoMediaLoadLabel2", t.mediaLoadingLabel);
   translateText("closingNote", t.closingNote);
   translateText("exploreBtn", t.exploreBtn);
   translateText("navHome", t.navHome);
@@ -523,7 +490,12 @@ const renderSlides = () => {
           ? `${categoryLabel}，第 ${idx + 1} 張`
           : `${categoryLabel} ${idx + 1}`;
       const loadingMode = idx === 0 ? "eager" : "lazy";
-      return `<article class="slide"><div class="slide-media-host">${SLIDE_LOADING_HTML}<img src="${src}" alt="${alt}" loading="${loadingMode}" decoding="async" /></div></article>`;
+      return `<article class="slide media-donut-shell" data-media-donut>
+      <div class="media-donut-fg">
+        <img src="${src}" alt="${alt}" loading="${loadingMode}" decoding="async" />
+      </div>
+      ${MEDIA_DONUT_PLACEHOLDER_HTML}
+    </article>`;
     })
     .join("");
 
@@ -537,7 +509,7 @@ const renderSlides = () => {
 
   currentIndex = 0;
   updateCarousel();
-  bindSlideImageLoads();
+  initMediaDonutShells(carouselTrack);
 };
 
 const updateCarousel = () => {
@@ -694,8 +666,4 @@ applyLanguage();
 applyActiveNav();
 restartAutoplay();
 runSiteBootPrefetch();
-
-setupIndeterminateMediaOverlay(document.getElementById("coverMediaLoadOverlay"), document.querySelector(".cover-image"));
-setupIndeterminateMediaOverlay(document.getElementById("aboutMediaLoadOverlay"), document.querySelector(".about-photo"));
-setupIndeterminateMediaOverlay(document.getElementById("videoMediaLoadOverlay1"), document.getElementById("videoEmbed1"));
-setupIndeterminateMediaOverlay(document.getElementById("videoMediaLoadOverlay2"), document.getElementById("videoEmbed2"));
+initMediaDonutShells(document.body);
